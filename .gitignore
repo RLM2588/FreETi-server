@@ -32,3 +32,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### some properties and files for encryption ###
+application-local.properties
+keystore.p12
+*.p12
