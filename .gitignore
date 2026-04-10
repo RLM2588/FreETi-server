@@ -38,3 +38,4 @@ build/
 application-local.properties
 keystore.p12
 *.p12
+server_certificate.crt
