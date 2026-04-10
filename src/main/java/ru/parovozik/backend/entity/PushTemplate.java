@@ -1,13 +1,10 @@
 package ru.parovozik.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.Duration;
 import java.time.Period;
-
+@Entity
 public class PushTemplate {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
