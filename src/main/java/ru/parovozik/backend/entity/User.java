@@ -37,7 +37,7 @@ public class User {
     private Set<Task> tasks;
 
     @OneToMany(mappedBy = "user")
-    private Set<RepeatTasks> repeatTasks;
+    private Set<RepeatTask> repeatTasks;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name="Contacts",
