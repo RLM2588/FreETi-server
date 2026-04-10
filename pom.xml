@@ -50,6 +50,9 @@
                 <artifactId>spring-boot-starter-hateoas</artifactId>
             </dependency>
 
+
+
+
             <!-- Swagger / OpenAPI (только одна версия!) -->
             <dependency>
                 <groupId>org.springdoc</groupId>
