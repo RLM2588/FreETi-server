@@ -33,10 +33,10 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     private Avatar avatar;
 
-    @OneToMany(mappedBy="user")
+    @OneToMany(mappedBy="userId")
     private Set<Task> tasks;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "userId")
     private Set<RepeatTask> repeatTasks;
 
     @ManyToMany(fetch = FetchType.LAZY)

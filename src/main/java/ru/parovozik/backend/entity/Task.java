@@ -20,6 +20,6 @@ public class Task extends TaskTemplate{
     private UUID id;
 
     @Column
-    private Integer user;
+    private Integer userId;
 
 }

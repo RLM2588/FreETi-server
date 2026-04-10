@@ -21,5 +21,5 @@ public class RepeatTask extends TaskTemplate{
     private UUID id;
 
     @Column
-    private Integer user;
+    private Integer userId;
 }
