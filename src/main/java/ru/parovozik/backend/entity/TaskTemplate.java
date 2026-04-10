@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 import org.hibernate.generator.EventType;
 import ru.parovozik.backend.model.Status;
 
