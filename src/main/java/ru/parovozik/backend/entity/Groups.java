@@ -1,12 +1,10 @@
 package ru.parovozik.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -27,6 +25,18 @@ public class Groups {
 
     @Column(length=100)
     private String body;
+
+    public Set<GroupEvents> getGroupEventsSet() {
+        return groupEventsSet;
+    }
+
+    public void setGroupEventsSet(Set<GroupEvents> groupEventsSet) {
+        this.groupEventsSet = groupEventsSet;
+    }
+
+    @OneToMany(mappedBy = "groupId",fetch = FetchType.LAZY)
+    private Set<GroupEvents> groupEventsSet;
+
 
     public Groups() {
     }

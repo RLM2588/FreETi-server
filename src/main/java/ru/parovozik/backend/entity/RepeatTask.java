@@ -1,14 +1,19 @@
 package ru.parovozik.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
+import ru.parovozik.backend.model.Color;
+import ru.parovozik.backend.model.Privacy;
+import ru.parovozik.backend.model.Status;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.UUID;
 
 @Entity
+@Table
 public class RepeatTask extends TaskTemplate{
     @Id
     @Generated(event = EventType.INSERT)
@@ -20,6 +25,79 @@ public class RepeatTask extends TaskTemplate{
     )
     private UUID id;
 
-    @Column
-    private Integer userId;
+    @Column(name="globalEnd")
+    private LocalDateTime globalEnd;
+
+    @Column(name = "before_how_days",columnDefinition = "interval")
+    private Period beforeHowDays;
+
+    @Column(name = "before_how_hours",columnDefinition = "interval")
+    private Duration beforeHowHours;
+
+    @ManyToOne(fetch =  FetchType.LAZY)
+    private User userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PushTemplate pushTemplate;
+
+    public RepeatTask() {
+    }
+
+    public RepeatTask(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color, UUID id, LocalDateTime globalEnd, Period beforeHowDays, Duration beforeHowHours, User userId, PushTemplate pushTemplate) {
+        super(title, body, createdAt, isEdited, start, end, status, privacy, color);
+        this.id = id;
+        this.globalEnd = globalEnd;
+        this.beforeHowDays = beforeHowDays;
+        this.beforeHowHours = beforeHowHours;
+        this.userId = userId;
+        this.pushTemplate = pushTemplate;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getGlobalEnd() {
+        return globalEnd;
+    }
+
+    public void setGlobalEnd(LocalDateTime globalEnd) {
+        this.globalEnd = globalEnd;
+    }
+
+    public Period getBeforeHowDays() {
+        return beforeHowDays;
+    }
+
+    public void setBeforeHowDays(Period beforeHowDays) {
+        this.beforeHowDays = beforeHowDays;
+    }
+
+    public Duration getBeforeHowHours() {
+        return beforeHowHours;
+    }
+
+    public void setBeforeHowHours(Duration beforeHowHours) {
+        this.beforeHowHours = beforeHowHours;
+    }
+
+    public User getUserId() {
+        return userId;
+    }
+
+    public void setUserId(User userId) {
+        this.userId = userId;
+    }
+
+    public PushTemplate getPushTemplate() {
+        return pushTemplate;
+    }
+
+    public void setPushTemplate(PushTemplate pushTemplate) {
+        this.pushTemplate = pushTemplate;
+    }
 }

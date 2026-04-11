@@ -36,7 +36,7 @@ build/
 
 
 ### some properties and files for encryption ###
-application-local.properties
-keystore.p12
-*.p12
-server_certificate.crt
+**/application-local.properties
+**/keystore.p12
+**/*.p12
+**/server_certificate.crt

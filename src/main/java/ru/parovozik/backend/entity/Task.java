@@ -1,13 +1,18 @@
 package ru.parovozik.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
+import ru.parovozik.backend.model.Color;
+import ru.parovozik.backend.model.Privacy;
+import ru.parovozik.backend.model.Status;
+
+import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@Table
 public class Task extends TaskTemplate{
     @Id
     @Generated(event = EventType.INSERT)
@@ -19,7 +24,55 @@ public class Task extends TaskTemplate{
     )
     private UUID id;
 
-    @Column
-    private Integer userId;
+    @ManyToOne(optional = true)
+    private RepeatTask repeatTask;
 
+    @ManyToOne(fetch =  FetchType.LAZY)
+    private User userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PushTemplate pushTemplate;
+
+    public Task() {
+    }
+
+    public Task(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color, UUID id, RepeatTask repeatTask, User userId, PushTemplate pushTemplate) {
+        super(title, body, createdAt, isEdited, start, end, status, privacy, color);
+        this.id = id;
+        this.repeatTask = repeatTask;
+        this.userId = userId;
+        this.pushTemplate = pushTemplate;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public RepeatTask getRepeatTask() {
+        return repeatTask;
+    }
+
+    public void setRepeatTask(RepeatTask repeatTask) {
+        this.repeatTask = repeatTask;
+    }
+
+    public User getUserId() {
+        return userId;
+    }
+
+    public void setUserId(User userId) {
+        this.userId = userId;
+    }
+
+    public PushTemplate getPushTemplate() {
+        return pushTemplate;
+    }
+
+    public void setPushTemplate(PushTemplate pushTemplate) {
+        this.pushTemplate = pushTemplate;
+    }
 }

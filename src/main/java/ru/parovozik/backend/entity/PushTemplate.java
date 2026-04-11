@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.Duration;
 import java.time.Period;
 @Entity
+@Table
 public class PushTemplate {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

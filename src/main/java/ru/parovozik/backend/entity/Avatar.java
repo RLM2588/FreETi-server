@@ -31,7 +31,6 @@ public class Avatar {
 
     public Avatar() {}
 
-
     public Avatar(int avatarId, String link) {
         this.avatarId = avatarId;
         this.link = link;

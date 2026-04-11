@@ -23,9 +23,77 @@ public class Poll {
     @Column(length = 80)
     private String title;
 
+    @Column(nullable = false)
+    private String var1;
+
+    @Column(nullable = false)
+    private String var2;
+
+    @Column
+    private String var3;
+
+    @Column
+    private String var4;
+
+    @Column
+    private String var5;
+
+
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="voting_id")
+    private GroupEvents groupEvent;
+
+    public Poll() {
+    }
+
+    public Poll(UUID id, String title, String var1, String var2, String var3, String var4, String var5, Status status, GroupEvents groupEvent) {
+        this.id = id;
+        this.title = title;
+        this.var1 = var1;
+        this.var2 = var2;
+        this.var3 = var3;
+        this.var4 = var4;
+        this.var5 = var5;
+        this.status = status;
+        this.groupEvent = groupEvent;
+    }
 
 
+
+
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public GroupEvents getGroupEvent() {
+        return groupEvent;
+    }
+
+    public void setGroupEvent(GroupEvents groupEvent) {
+        this.groupEvent = groupEvent;
+    }
 }

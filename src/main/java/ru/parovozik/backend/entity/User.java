@@ -42,30 +42,55 @@ public class User {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name="Contacts",
             joinColumns=@JoinColumn(name="userId"),
-            inverseJoinColumns=@JoinColumn(name="contactsId")
+            inverseJoinColumns=@JoinColumn(name="contactId")
     )
-    private Set<User> friends = new HashSet<User>();
+    private Set<User> friends = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name="Contacts",
-            joinColumns=@JoinColumn(name="contactsId"),
-            inverseJoinColumns=@JoinColumn(name="userId")
-    )
-    private Set<User> friendsOf = new HashSet<User>();
+    @ManyToMany(mappedBy = "friends",fetch = FetchType.LAZY)
+    private Set<User> friendsOf = new HashSet<>();
 
-    public User() {
-    }
-
-    public User(int userId, String username, String email, String password, LocalDateTime createdAt, Avatar avatar, Set<User> friends, Set<User> friendsOf) {
+    public User(int userId, String username, String email, String password, LocalDateTime createdAt, Avatar avatar, Set<Task> tasks, Set<RepeatTask> repeatTasks, Set<User> friends, Set<User> friendsOf) {
         this.userId = userId;
         this.username = username;
         this.email = email;
         this.password = password;
         this.createdAt = createdAt;
         this.avatar = avatar;
+        this.tasks = tasks;
+        this.repeatTasks = repeatTasks;
         this.friends = friends;
         this.friendsOf = friendsOf;
     }
+
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public Set<RepeatTask> getRepeatTasks() {
+        return repeatTasks;
+    }
+
+    public void setRepeatTasks(Set<RepeatTask> repeatTasks) {
+        this.repeatTasks = repeatTasks;
+    }
+
+    public void addFollower(User follower) {
+        this.friends.add(follower);
+        follower.getFriends().add(this);
+    }
+
+    public void removeFollower(User follower) {
+        this.friends.remove(follower);
+        follower.getFriends().remove(this);
+    }
+
+    public User() {
+    }
+
 
     public int getUserId() {
         return userId;

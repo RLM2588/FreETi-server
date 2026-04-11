@@ -1,7 +1,66 @@
 package ru.parovozik.backend.entity;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+import ru.parovozik.backend.model.Color;
+import ru.parovozik.backend.model.Privacy;
+import ru.parovozik.backend.model.Status;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-public class GroupEvents {
+@Entity
+@Table
+public class GroupEvents extends TaskTemplate {
+    @Id
+    @Generated(event = EventType.INSERT)
+    @Column(
+            name = "id",
+            updatable = false,
+            nullable = false,
+            columnDefinition = "UUID DEFAULT uuidv7()"
+    )
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User createByUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Groups groupId;
+
+    public GroupEvents() {
+    }
+
+    public GroupEvents(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color, UUID id, User createByUser, Groups groupId) {
+        super(title, body, createdAt, isEdited, start, end, status, privacy, color);
+        this.id = id;
+        this.createByUser = createByUser;
+        this.groupId = groupId;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public User getCreateByUser() {
+        return createByUser;
+    }
+
+    public void setCreateByUser(User createByUser) {
+        this.createByUser = createByUser;
+    }
+
+    public Groups getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Groups groupId) {
+        this.groupId = groupId;
+    }
+
 }
