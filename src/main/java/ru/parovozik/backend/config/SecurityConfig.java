@@ -22,33 +22,10 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authz -> authz.requestMatchers("/docs", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // Разрешаем доступ к Swagger UI и ресурсам без аутентификации
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        // Разрешаем доступ к публичным API
-                        .requestMatchers("/api/public/**").permitAll()
-                        // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .defaultSuccessUrl("/swagger-ui/index.html", true)
+                ).formLogin(form -> form
+                        .loginPage("/login")  // Кастомная страница логина (опционально)
                         .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/swagger-ui/index.html")
-                        .permitAll()
-                )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api/**"
-                        )
                 );
 
         return http.build();
@@ -58,7 +35,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
                 .username("admin")
-                .password(passwordEncoder().encode("admin123"))
+                .password(passwordEncoder().encode("aAaA2431BbBb1"))
                 .roles("USER", "ADMIN")
                 .build();
 
