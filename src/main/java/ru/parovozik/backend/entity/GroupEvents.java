@@ -29,6 +29,17 @@ public class GroupEvents extends TaskTemplate {
     @ManyToOne(fetch = FetchType.LAZY)
     private Groups group;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PushTemplate pushTemplate;
+
+    public PushTemplate getPushTemplate() {
+        return pushTemplate;
+    }
+
+    public void setPushTemplate(PushTemplate pushTemplate) {
+        this.pushTemplate = pushTemplate;
+    }
+
     public GroupEvents() {
     }
 

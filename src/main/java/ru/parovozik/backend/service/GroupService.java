@@ -38,13 +38,13 @@ public class GroupService {
     }
 
 
-    public boolean createGroup(String title, String body) {
+    public UUID createGroup(String title, String body) {
         try {
             Groups group = new Groups();
             group.setTitle(title);
             group.setBody(body);
             groupsRepository.save(group);
-            return true;
+            return group.getId();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

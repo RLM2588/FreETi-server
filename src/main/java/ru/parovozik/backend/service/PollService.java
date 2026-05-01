@@ -22,7 +22,7 @@ public class PollService {
         this.voteRepository = voteRepository;
     }
 
-    public boolean createPoll(PollRequest pollRequest) {
+    public UUID createPoll(PollRequest pollRequest) {
         try {
             Poll poll = new Poll();
             poll.setTitle(pollRequest.title());
@@ -34,7 +34,7 @@ public class PollService {
             if (poll.getVar4() != null) poll.setVar4(poll.getVar4());
             if (poll.getVar5() != null) poll.setVar5(poll.getVar5());
             pollRepository.save(poll);
-            return true;
+            return poll.getId();
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
