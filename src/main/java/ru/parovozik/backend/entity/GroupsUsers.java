@@ -3,7 +3,6 @@ package ru.parovozik.backend.entity;
 import jakarta.persistence.*;
 import ru.parovozik.backend.model.Role;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table

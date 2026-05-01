@@ -40,3 +40,6 @@ build/
 **/keystore.p12
 **/*.p12
 **/server_certificate.crt
+
+.DS_Store/
+.DS_Store

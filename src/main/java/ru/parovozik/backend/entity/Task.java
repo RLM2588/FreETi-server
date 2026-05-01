@@ -8,7 +8,6 @@ import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
