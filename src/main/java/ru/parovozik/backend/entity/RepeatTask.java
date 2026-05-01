@@ -35,7 +35,7 @@ public class RepeatTask extends TaskTemplate{
     private Duration beforeHowHours;
 
     @ManyToOne(fetch =  FetchType.LAZY)
-    private User userId;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private PushTemplate pushTemplate;
@@ -49,7 +49,7 @@ public class RepeatTask extends TaskTemplate{
         this.globalEnd = globalEnd;
         this.beforeHowDays = beforeHowDays;
         this.beforeHowHours = beforeHowHours;
-        this.userId = userId;
+        this.user = userId;
         this.pushTemplate = pushTemplate;
     }
 
@@ -86,11 +86,11 @@ public class RepeatTask extends TaskTemplate{
     }
 
     public User getUserId() {
-        return userId;
+        return user;
     }
 
     public void setUserId(User userId) {
-        this.userId = userId;
+        this.user = userId;
     }
 
     public PushTemplate getPushTemplate() {

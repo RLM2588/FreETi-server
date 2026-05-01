@@ -1,18 +1,13 @@
 package ru.parovozik.backend.service;
 
 import jakarta.transaction.Transactional;
-import org.apache.juli.logging.Log;
-import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.parovozik.backend.dto.UserAnswer;
 import ru.parovozik.backend.dto.UserRequest;
-import ru.parovozik.backend.entity.GroupEvents;
-import ru.parovozik.backend.entity.RepeatTask;
-import ru.parovozik.backend.entity.Task;
-import ru.parovozik.backend.entity.User;
+import ru.parovozik.backend.entity.*;
 import ru.parovozik.backend.repostitory.*;
 
 import java.util.ArrayList;
@@ -27,13 +22,15 @@ public class UserService {
     private final RepeatTaskRepository repeatTaskRepository;
     private final GroupUsersRepository groupUsersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AvatarRepository avatarRepository;
 
-    public UserService(UserRepository userRepository, TaskRepository taskRepository, RepeatTaskRepository repeatTaskRepository, GroupUsersRepository groupUsersRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, TaskRepository taskRepository, RepeatTaskRepository repeatTaskRepository, GroupUsersRepository groupUsersRepository, PasswordEncoder passwordEncoder, AvatarRepository avatarRepository) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.repeatTaskRepository = repeatTaskRepository;
         this.groupUsersRepository = groupUsersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.avatarRepository = avatarRepository;
     }
 
     public boolean addUser(UserRequest userResponse) {
@@ -101,11 +98,31 @@ public class UserService {
         return userAnswers;
     }
 
+
+    @Transactional
+    public boolean updateAvatar(String username, String link) {
+        User user = userRepository.findUserByUsername(username);
+        Avatar avatar =  avatarRepository.findByLink(link);
+        if(user != null) {
+            if(avatar != null) {
+                user.setAvatar(avatar);
+            }
+            else {
+                Avatar avatar1 = new Avatar();
+                avatar1.setLink(link);
+                avatarRepository.save(avatar1);
+            }
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
     @Transactional
     public void deleteUser(String username) {
         User user = userRepository.findUserByUsername(username);
-        taskRepository.deleteAllByUserId(user);
-        repeatTaskRepository.deleteAllByUserId(user);
+        taskRepository.deleteAllByUser(user);
+        repeatTaskRepository.deleteAllByUser(user);
         groupUsersRepository.deleteAllByUser(user);
         userRepository.deleteContacts(user.getUserId());
         userRepository.delete(user);
