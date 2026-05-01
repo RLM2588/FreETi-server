@@ -22,6 +22,10 @@ public interface VoteRepository extends CrudRepository<Vote,Long> {
 
 
     void deleteAllByPoll(Poll poll);
+
+    Vote findByUserIDAndPoll(User user, Poll poll);
+
+    List<Vote> findAllByPoll(Poll poll);
 }
 
 
