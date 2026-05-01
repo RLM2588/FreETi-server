@@ -15,4 +15,6 @@ public interface PollRepository extends CrudRepository<Poll, UUID> {
     List<Poll> findAllByGroupEvent(GroupEvents groupEvent);
 
     List<Poll> findAllByGroupEventIn(List<GroupEvents> groupEventsList);
+
+    Poll findPollById(UUID id);
 }
