@@ -20,5 +20,5 @@ public interface UserRepository extends CrudRepository<User,Integer> {
     void deleteContacts(@Param("userId") long userId);
 
     @Query("SELECT DISTINCT c FROM User u JOIN u.friends c WHERE u.userId = :userId")
-    List<User> findFriends(@Param("userId") Long userId);
+    List<User> findFriends(@Param("userId") long userId);
 }

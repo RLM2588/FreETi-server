@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import ru.parovozik.backend.entity.Poll;
 import ru.parovozik.backend.entity.User;
 import ru.parovozik.backend.entity.Vote;
 
@@ -20,7 +21,7 @@ public interface VoteRepository extends CrudRepository<Vote,Long> {
     void reassignVotesToDefaultUser(@Param("userId") User user);
 
 
-
+    void deleteAllByPoll(Poll poll);
 }
 
 

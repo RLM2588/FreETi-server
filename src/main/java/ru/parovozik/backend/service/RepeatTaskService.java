@@ -1,5 +1,6 @@
 package ru.parovozik.backend.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.parovozik.backend.dto.RepeatTaskRequest;
 import ru.parovozik.backend.dto.TaskRequest;
@@ -17,7 +18,9 @@ import ru.parovozik.backend.repostitory.UserRepository;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.List;
 
 @Service
 public class RepeatTaskService {
@@ -56,6 +59,24 @@ public class RepeatTaskService {
             return true;
         }
         return false;
+    }
+    @Transactional
+    public boolean deleteTask(String title, String username) {
+        User user = userRepository.findUserByUsername(username);
+        if(user != null) {
+            RepeatTask task = repeatTaskRepository.findByTitleAndUser(title,user);
+            List<Task> allOverrides = taskRepository.findAllByUserAndRepeatTask(
+                    user, task);
+            taskRepository.deleteAll(allOverrides);
+            repeatTaskRepository.delete(task);
+            return true;
+        }
+        return false;
+    }
+
+    public RepeatTask getRepeatTask(String title, String username) {
+        User user = userRepository.findUserByUsername(username);
+        return repeatTaskRepository.findByTitleAndUser(title,user);
     }
 
     public boolean updateTitle(String title, String username, String newTitle) {

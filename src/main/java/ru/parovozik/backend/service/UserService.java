@@ -98,6 +98,32 @@ public class UserService {
         return userAnswers;
     }
 
+    @Transactional
+    public void addFriend(String usernameTo, String usernameFrom) {
+        User user1 = userRepository.findUserByUsername(usernameTo);
+        User user2 = userRepository.findUserByUsername(usernameFrom);
+        if(user1 != null && user2 != null) {
+            user1.getFriends().add(user2);
+            user2.getFriendsOf().add(user1);
+        }
+        else {
+            throw new IllegalArgumentException("User or users not found");
+        }
+    }
+
+    @Transactional
+    public void deleteFriend(String usernameTo, String usernameFrom) {
+        User user1 = userRepository.findUserByUsername(usernameTo);
+        User user2 = userRepository.findUserByUsername(usernameFrom);
+        if(user1 != null && user2 != null) {
+            user1.getFriends().remove(user2);
+            user2.getFriendsOf().remove(user1);
+        }
+        else {
+            throw new IllegalArgumentException("User or users not found");
+        }
+    }
+
 
     @Transactional
     public boolean updateAvatar(String username, String link) {

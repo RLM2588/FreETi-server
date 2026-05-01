@@ -27,7 +27,7 @@ public class GroupEvents extends TaskTemplate {
     private User createByUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Groups groupId;
+    private Groups group;
 
     public GroupEvents() {
     }
@@ -36,7 +36,7 @@ public class GroupEvents extends TaskTemplate {
         super(title, body, createdAt, isEdited, start, end, status, privacy, color);
         this.id = id;
         this.createByUser = createByUser;
-        this.groupId = groupId;
+        this.group = groupId;
     }
 
     public UUID getId() {
@@ -55,12 +55,12 @@ public class GroupEvents extends TaskTemplate {
         this.createByUser = createByUser;
     }
 
-    public Groups getGroupId() {
-        return groupId;
+    public Groups getGroup() {
+        return group;
     }
 
-    public void setGroupId(Groups groupId) {
-        this.groupId = groupId;
+    public void setGroup(Groups groupId) {
+        this.group = groupId;
     }
 
 }

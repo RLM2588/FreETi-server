@@ -23,4 +23,14 @@ public class AvatarService {
             throw new RuntimeException();
         }
     }
+
+    public boolean delete(String link) {
+        try{
+            Avatar avatar = avatarRepository.findByLink(link);
+            avatarRepository.delete(avatar);return true;
+        }
+        catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
 }

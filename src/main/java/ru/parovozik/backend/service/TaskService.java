@@ -64,6 +64,21 @@ public class TaskService {
         return false;
     }
 
+    public Task getTask(String title, String username, LocalDateTime start, LocalDateTime end) {
+        User user = userRepository.findUserByUsername(username);
+        return taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user);
+    }
+
+    public boolean deleteTask(String title, String username, LocalDateTime start, LocalDateTime end) {
+        User user = userRepository.findUserByUsername(username);
+        if(user != null) {
+            Task task = taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user);
+            taskRepository.delete(task);
+            return true;
+        }
+        return false;
+    }
+
     public boolean updateTitle(String title, String username, LocalDateTime start, LocalDateTime end, String newTitle) {
         User user = userRepository.findUserByUsername(username);
         if(user != null) {
