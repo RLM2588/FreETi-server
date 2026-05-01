@@ -17,9 +17,6 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public class TaskTemplate {
 
-    @Column(length = 80)
-    private String title;
-
     @Column(length = 100)
     private String body;
 

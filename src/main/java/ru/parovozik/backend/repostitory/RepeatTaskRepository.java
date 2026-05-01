@@ -14,4 +14,5 @@ import java.util.UUID;
 public interface RepeatTaskRepository extends CrudRepository<RepeatTask, UUID> {
     void deleteAllByUser(User user);
     List<RepeatTask> findRepeatTaskByUserAndGlobalEndAfter(User user, LocalDateTime start);
+    RepeatTask findByTitleAndUser(String title, User user);
 }

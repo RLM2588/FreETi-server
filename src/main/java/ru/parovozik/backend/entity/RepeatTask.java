@@ -25,6 +25,9 @@ public class RepeatTask extends TaskTemplate{
     )
     private UUID id;
 
+    @Column(length = 80,unique = true)
+    private String title;
+
     @Column(name="globalEnd")
     private LocalDateTime globalEnd;
 

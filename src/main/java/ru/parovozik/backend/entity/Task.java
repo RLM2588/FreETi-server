@@ -23,6 +23,9 @@ public class Task extends TaskTemplate{
     )
     private UUID id;
 
+    @Column(length = 80)
+    private String title;
+
     @ManyToOne(optional = true)
     private RepeatTask repeatTask = null;
 

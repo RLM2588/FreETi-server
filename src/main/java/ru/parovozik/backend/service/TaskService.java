@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.parovozik.backend.dto.TaskAnswer;
 import ru.parovozik.backend.dto.TaskRequest;
 import ru.parovozik.backend.dto.UpdateTime;
+import ru.parovozik.backend.entity.PushTemplate;
 import ru.parovozik.backend.entity.RepeatTask;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
@@ -18,6 +19,7 @@ import ru.parovozik.backend.repostitory.RepeatTaskRepository;
 import ru.parovozik.backend.repostitory.TaskRepository;
 import ru.parovozik.backend.repostitory.UserRepository;
 
+import javax.management.openmbean.KeyAlreadyExistsException;
 import javax.swing.plaf.nimbus.State;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -42,6 +44,9 @@ public class TaskService {
 
     public boolean createTask(TaskRequest taskRequest) {
         Task task = new Task();
+        User user = userRepository.findUserByUsername(taskRequest.username());
+        if(taskRepository.findByTitleAndStartAndEndingAndUser(taskRequest.title(), taskRequest.starting(), taskRequest.ending(), user) !=null)
+            throw new KeyAlreadyExistsException();
         task.setTitle(taskRequest.title());
         task.setBody(taskRequest.body());
         task.setPushTemplate(taskRequest.pushTemplate());
@@ -49,7 +54,8 @@ public class TaskService {
         task.setPrivacy(taskRequest.privacy());
         task.setStatus(taskRequest.status());
         task.setStart(taskRequest.starting());
-        User user = userRepository.findUserByUsername(taskRequest.username());
+        task.setEnd(taskRequest.ending());
+        task.setEdited(false);
         if(user!=null) {
             task.setUserId(user);
             taskRepository.save(task);
@@ -85,6 +91,17 @@ public class TaskService {
         if(user != null) {
             Task task = taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user);
             task.setStart(newStart);
+            taskRepository.save(task);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean updatePushTemplate(String title, String username, LocalDateTime start, LocalDateTime end, PushTemplate pushTemplate) {
+        User user = userRepository.findUserByUsername(username);
+        if(user != null) {
+            Task task = taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user);
+            task.setPushTemplate(pushTemplate);
             taskRepository.save(task);
             return true;
         }
@@ -218,12 +235,12 @@ public class TaskService {
 
     private TaskAnswer toTaskAnswer(Task task) {
         return new TaskAnswer(task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
-                task.getColor(), task.getStart(), task.getEnd(), task.getPushTemplate());
+                task.getColor(), task.getStart(), task.getEnd(), task.getPushTemplate(),(task.getRepeatTask() != null ? task.getRepeatTask().getId() : null));
     }
 
     private TaskAnswer toTaskAnswer(RepeatTask rp, LocalDateTime start, LocalDateTime end) {
         return new TaskAnswer(rp.getTitle(), rp.getBody(), rp.getStatus(), rp.getPrivacy(),
-                rp.getColor(), start, end, rp.getPushTemplate());
+                rp.getColor(), start, end, rp.getPushTemplate(), null);
     }
 
 }
