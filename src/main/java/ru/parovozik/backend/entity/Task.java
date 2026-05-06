@@ -8,7 +8,6 @@ import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -24,11 +23,14 @@ public class Task extends TaskTemplate{
     )
     private UUID id;
 
+    @Column(length = 80)
+    private String title;
+
     @ManyToOne(optional = true)
-    private RepeatTask repeatTask;
+    private RepeatTask repeatTask = null;
 
     @ManyToOne(fetch =  FetchType.LAZY)
-    private User userId;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private PushTemplate pushTemplate;
@@ -40,7 +42,7 @@ public class Task extends TaskTemplate{
         super(title, body, createdAt, isEdited, start, end, status, privacy, color);
         this.id = id;
         this.repeatTask = repeatTask;
-        this.userId = userId;
+        this.user = userId;
         this.pushTemplate = pushTemplate;
     }
 
@@ -61,11 +63,11 @@ public class Task extends TaskTemplate{
     }
 
     public User getUserId() {
-        return userId;
+        return user;
     }
 
     public void setUserId(User userId) {
-        this.userId = userId;
+        this.user = userId;
     }
 
     public PushTemplate getPushTemplate() {

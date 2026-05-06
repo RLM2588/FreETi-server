@@ -6,4 +6,6 @@ import ru.parovozik.backend.entity.Avatar;
 
 @RepositoryRestResource(path = "avatar")
 public interface AvatarRepository extends CrudRepository<Avatar,Integer> {
+
+    Avatar findByLink(String link);
 }

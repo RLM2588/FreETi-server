@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @RepositoryRestResource(path = "groups")
 public interface GroupsRepository extends CrudRepository<Groups, UUID> {
+    Groups getById(UUID uuid);
 }

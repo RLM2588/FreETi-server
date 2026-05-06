@@ -15,12 +15,15 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private int userId;
+    private long userId;
 
-    @Column(length =  80)
+    @Column(length =  80,unique = true)
     private String username;
 
-    @Column
+    @Column(length =  80,unique = true)
+    private String name;
+
+    @Column(unique = true)
     private String email;
 
     @Column
@@ -33,10 +36,10 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     private Avatar avatar;
 
-    @OneToMany(mappedBy="userId")
+    @OneToMany(mappedBy="user")
     private Set<Task> tasks;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user")
     private Set<RepeatTask> repeatTasks;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -91,12 +94,19 @@ public class User {
     public User() {
     }
 
+    public String getName() {
+        return name;
+    }
 
-    public int getUserId() {
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 

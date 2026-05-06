@@ -21,6 +21,17 @@ public class Vote {
     @Column
     private Integer variant;
 
+    @Column
+    private boolean isLeft = false;
+
+    public boolean isLeft() {
+        return isLeft;
+    }
+
+    public void setLeft(boolean left) {
+        isLeft = left;
+    }
+
     public Vote() {
     }
 

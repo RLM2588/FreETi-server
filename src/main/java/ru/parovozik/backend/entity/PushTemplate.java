@@ -9,7 +9,7 @@ import java.time.Period;
 public class PushTemplate {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private int userId;
+    private int pushId;
 
     @Column(name = "before_how_days",columnDefinition = "interval")
     private Period beforeHowDays;
