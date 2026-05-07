@@ -46,8 +46,25 @@ public class RepeatTask extends TaskTemplate{
     public RepeatTask() {
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public RepeatTask(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color, UUID id, LocalDateTime globalEnd, Period beforeHowDays, Duration beforeHowHours, User userId, PushTemplate pushTemplate) {
-        super(title, body, createdAt, isEdited, start, end, status, privacy, color);
+        super(body, createdAt, isEdited, start, end, status, privacy, color);
+        this.title = title;
         this.id = id;
         this.globalEnd = globalEnd;
         this.beforeHowDays = beforeHowDays;

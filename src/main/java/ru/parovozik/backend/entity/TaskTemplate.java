@@ -45,8 +45,7 @@ public class TaskTemplate {
     @Enumerated(EnumType.STRING)
     private Color color;
 
-    public TaskTemplate(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color) {
-        this.title = title;
+    public TaskTemplate(String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color) {
         this.body = body;
         this.createdAt = createdAt;
         this.isEdited = isEdited;
@@ -82,14 +81,6 @@ public class TaskTemplate {
 
     public void setColor(Color color) {
         this.color = color;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public String getBody() {

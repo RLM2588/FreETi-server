@@ -20,18 +20,18 @@ public class PushTemplate {
     public PushTemplate() {
     }
 
-    public PushTemplate(int userId, Period beforeHowDays, Duration beforeHowHours) {
-        this.userId = userId;
+    public PushTemplate(int pushId, Period beforeHowDays, Duration beforeHowHours) {
+        this.pushId = pushId;
         this.beforeHowDays = beforeHowDays;
         this.beforeHowHours = beforeHowHours;
     }
 
-    public int getUserId() {
-        return userId;
+    public int getPushId() {
+        return pushId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setPushId(int pushId) {
+        this.pushId = pushId;
     }
 
     public Period getBeforeHowDays() {

@@ -18,8 +18,6 @@ import ru.parovozik.backend.repostitory.UserRepository;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-
 @Service
 public class GroupEventService {
     private final GroupEventsRepository groupEventsRepository;

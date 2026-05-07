@@ -34,7 +34,7 @@ public class Groups {
         this.groupEventsSet = groupEventsSet;
     }
 
-    @OneToMany(mappedBy = "groupId",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group",fetch = FetchType.LAZY)
     private Set<GroupEvents> groupEventsSet;
 
 

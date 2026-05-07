@@ -23,6 +23,17 @@ public class GroupEvents extends TaskTemplate {
     )
     private UUID id;
 
+    @Column(length = 80)
+    private String title;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User createByUser;
 
@@ -44,7 +55,8 @@ public class GroupEvents extends TaskTemplate {
     }
 
     public GroupEvents(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color, UUID id, User createByUser, Groups groupId) {
-        super(title, body, createdAt, isEdited, start, end, status, privacy, color);
+        super(body, createdAt, isEdited, start, end, status, privacy, color);
+        this.title = title;
         this.id = id;
         this.createByUser = createByUser;
         this.group = groupId;

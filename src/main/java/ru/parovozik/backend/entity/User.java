@@ -15,7 +15,7 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private long userId;
+    private int userId;
 
     @Column(length =  80,unique = true)
     private String username;
@@ -102,11 +102,11 @@ public class User {
         this.name = name;
     }
 
-    public long getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
