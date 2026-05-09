@@ -21,7 +21,7 @@ public class TaskTemplate {
     private String body;
 
     @Column
-    @CurrentTimestamp(event = EventType.INSERT)
+    @CurrentTimestamp(event = {EventType.INSERT, EventType.UPDATE})
     private LocalDateTime createdAt;
 
     @Column
