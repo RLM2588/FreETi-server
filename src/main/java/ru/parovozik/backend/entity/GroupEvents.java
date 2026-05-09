@@ -3,7 +3,6 @@ package ru.parovozik.backend.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
-import ru.parovozik.backend.model.Color;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 
@@ -54,7 +53,7 @@ public class GroupEvents extends TaskTemplate {
     public GroupEvents() {
     }
 
-    public GroupEvents(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color, UUID id, User createByUser, Groups groupId) {
+    public GroupEvents(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, String color, UUID id, User createByUser, Groups groupId) {
         super(body, createdAt, isEdited, start, end, status, privacy, color);
         this.title = title;
         this.id = id;

@@ -9,7 +9,6 @@ import ru.parovozik.backend.entity.PushTemplate;
 import ru.parovozik.backend.entity.RepeatTask;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
-import ru.parovozik.backend.model.Color;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 import ru.parovozik.backend.repostitory.RepeatTaskRepository;
@@ -114,7 +113,7 @@ public class RepeatTaskService {
         return false;
     }
 
-    public boolean updateColor(String title, String username, Color color) {
+    public boolean updateColor(String title, String username, String color) {
         User user = userRepository.findUserByUsername(username);
         if(user != null) {
             RepeatTask task = repeatTaskRepository.findByTitleAndUser(title,user);

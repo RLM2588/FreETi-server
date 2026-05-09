@@ -66,6 +66,10 @@ public class UserService {
         return new UserAnswer(user.getName(),user.getUsername(),user.getAvatar().getLink());
     }
 
+    public User getUserAsUser(String username) {
+        return userRepository.findUserByUsername(username);
+    }
+
     public UserAnswer getUser(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {

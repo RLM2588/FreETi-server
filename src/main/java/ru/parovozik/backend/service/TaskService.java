@@ -15,58 +15,58 @@ import ru.parovozik.backend.entity.User;
 import ru.parovozik.backend.model.Color;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
+import ru.parovozik.backend.repostitory.PushTemplateRepository;
 import ru.parovozik.backend.repostitory.RepeatTaskRepository;
 import ru.parovozik.backend.repostitory.TaskRepository;
 import ru.parovozik.backend.repostitory.UserRepository;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
 import javax.swing.plaf.nimbus.State;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final RepeatTaskRepository repeatTaskRepository;
+    private final PushTemplateRepository pushTemplateRepository;
 
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository, RepeatTaskRepository repeatTaskRepository) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository, RepeatTaskRepository repeatTaskRepository, PushTemplateRepository pushTemplateRepository) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.repeatTaskRepository = repeatTaskRepository;
+        this.pushTemplateRepository = pushTemplateRepository;
     }
 
 
-    public boolean createTask(TaskRequest taskRequest) {
+    public boolean createTask(TaskRequest taskRequest, String username) {
         Task task = new Task();
-        User user = userRepository.findUserByUsername(taskRequest.username());
-        if(taskRepository.findByTitleAndStartAndEndingAndUser(taskRequest.title(), taskRequest.starting(), taskRequest.ending(), user) !=null)
+        User user = userRepository.findUserByUsername(username);
+       if(taskRepository.findByTitleAndStartAndEndingAndUser(taskRequest.title(), toLocalDateTime(taskRequest.start()), toLocalDateTime(taskRequest.time_end()), user) !=null)
             throw new KeyAlreadyExistsException();
         task.setTitle(taskRequest.title());
         task.setBody(taskRequest.body());
-        task.setPushTemplate(taskRequest.pushTemplate());
-        task.setColor(taskRequest.color());
+        task.setPushTemplate(pushTemplateRepository.findPushTemplateByPushId(taskRequest.pushTemplate()));
+        task.setColor(taskRequest.colour());
         task.setPrivacy(taskRequest.privacy());
         task.setStatus(taskRequest.status());
-        task.setStart(taskRequest.starting());
-        task.setEnd(taskRequest.ending());
+        task.setStart(toLocalDateTime(taskRequest.start()));
+        task.setEnd(toLocalDateTime(taskRequest.time_end()));
         task.setEdited(false);
         if(user!=null) {
             task.setUserId(user);
             taskRepository.save(task);
+            System.out.println("YASOSALTRUMP!#**");
             return true;
         }
         return false;
     }
 
-    public Task getTask(String title, String username, LocalDateTime start, LocalDateTime end) {
+    public TaskAnswer getTask(String title, String username, LocalDateTime start, LocalDateTime end) {
         User user = userRepository.findUserByUsername(username);
-        return taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user);
+        Iterable<User> us = userRepository.findAll();
+        return this.toTaskAnswer(taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user));
     }
 
     public boolean deleteTask(String title, String username, LocalDateTime start, LocalDateTime end) {
@@ -134,7 +134,7 @@ public class TaskService {
         return false;
     }
 
-    public boolean updateColor(String title, String username, LocalDateTime start, LocalDateTime end, Color color) {
+    public boolean updateColor(String title, String username, LocalDateTime start, LocalDateTime end, String color) {
         User user = userRepository.findUserByUsername(username);
         if(user != null) {
             Task task = taskRepository.findByTitleAndStartAndEndingAndUser(title,start,end,user);
@@ -248,7 +248,7 @@ public class TaskService {
         return ls;
     }
 
-    private List<TaskAnswer> returnTasksByMonth(User user, List<Privacy> pr,LocalDateTime start, LocalDateTime end) {
+    public List<TaskAnswer> returnTasksByMonth(User user, List<Privacy> pr,LocalDateTime start, LocalDateTime end) {
         List<TaskAnswer> ls = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime minus = start;
@@ -289,12 +289,21 @@ public class TaskService {
 
     private TaskAnswer toTaskAnswer(Task task) {
         return new TaskAnswer(task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
-                task.getColor(), task.getStart(), task.getEnd(), task.getPushTemplate(),task.getImportance(),task.getCreatedAt());
+                task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), 1,task.getImportance(),toInstant(task.getCreatedAt()));
     }
 
     private TaskAnswer toTaskAnswer(RepeatTask rp, LocalDateTime start, LocalDateTime end) {
         return new TaskAnswer(rp.getTitle(), rp.getBody(), rp.getStatus(), rp.getPrivacy(),
-                rp.getColor(), start, end, rp.getPushTemplate(), rp.getImportance(),rp.getCreatedAt());
+                rp.getColor(), toInstant(start), toInstant(end), 1, rp.getImportance(),toInstant(rp.getCreatedAt()));
+    }
+
+    private LocalDateTime toLocalDateTime(Instant start) {
+        long epochSec = start.getEpochSecond();
+        return Instant.ofEpochMilli(epochSec).atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    private Instant toInstant(LocalDateTime start) {
+        return start.toInstant(ZoneOffset.UTC);
     }
 
 }

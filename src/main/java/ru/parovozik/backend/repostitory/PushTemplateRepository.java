@@ -12,4 +12,5 @@ import java.util.UUID;
 @RepositoryRestResource(path = "push_template")
 public interface PushTemplateRepository extends CrudRepository<PushTemplate, Integer> {
     PushTemplate findPushTemplateByBeforeHowDaysAndBeforeHowHours(Period beforeHowDays, Duration beforeHowHours);
+    PushTemplate findPushTemplateByPushId(int id);
 }

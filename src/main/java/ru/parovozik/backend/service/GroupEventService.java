@@ -8,7 +8,6 @@ import ru.parovozik.backend.entity.GroupEvents;
 import ru.parovozik.backend.entity.PushTemplate;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
-import ru.parovozik.backend.model.Color;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 import ru.parovozik.backend.repostitory.GroupEventsRepository;
@@ -152,7 +151,7 @@ public class GroupEventService {
         }
     }
 
-    public boolean updateColor(UUID uuid, Color color) {
+    public boolean updateColor(UUID uuid, String color) {
         try {
             GroupEvents task = groupEventsRepository.findById(uuid).get();
             task.setColor(color);

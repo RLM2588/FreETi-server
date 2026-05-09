@@ -11,6 +11,9 @@ public class PushTemplate {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private int pushId;
 
+    @Column
+    private int userId;
+
     @Column(name = "before_how_days",columnDefinition = "interval")
     private Period beforeHowDays;
 
