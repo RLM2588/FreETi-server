@@ -5,23 +5,16 @@ services:
       - "5432:5432"
     env_file:
       - ./.env
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB_INFO}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_INFO}
     volumes:
       - ./postgresql:/var/lib/postgresql
 
   main:
     build:
-      context:
-        .
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8091:8091"
     env_file:
       - ./.env
-
-
-
-
-
+    depends_on:
+      - postgresql
