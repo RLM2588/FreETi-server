@@ -248,6 +248,45 @@ public class TaskService {
         return ls;
     }
 
+    private List<TaskAnswer> returnTasksByMonth(User user, List<Privacy> pr,LocalDateTime start, LocalDateTime end) {
+        List<TaskAnswer> ls = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime minus = start;
+        LocalDateTime plus   = end;
+        if(user != null) {
+            List<Task> tasks = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIsNull(user, minus,plus);
+            for(Task task : tasks) {
+                if(pr.contains(task.getPrivacy()))
+                    ls.add(toTaskAnswer(task));
+            }
+            List<RepeatTask> repeatTasks = repeatTaskRepository.findRepeatTaskByUserAndGlobalEndAfter(user, minus);
+            Map<LocalDateTime, Task> overrides = new HashMap<>();
+            List<Task> allOverrides = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIn(
+                    user, minus,plus, repeatTasks);
+            allOverrides.forEach(t -> overrides.put(t.getStart(), t));
+            for(RepeatTask rp : repeatTasks) {
+                LocalDateTime time = rp.getStart();
+                Period per = rp.getBeforeHowDays();
+                Duration dur = rp.getBeforeHowHours();
+                Duration diff = Duration.between(rp.getStart(), rp.getEnd());
+                while(!time.isAfter(minus)) {
+                    time = time.plus(per).plus(dur);
+                }
+                while(time.isBefore(plus) || time.isBefore(rp.getGlobalEnd())) {
+                    Task taskFind = overrides.get(time);
+                    if (taskFind != null && pr.contains(taskFind.getPrivacy()))
+                        ls.add(toTaskAnswer(taskFind));
+                    else
+                    if(pr.contains(rp.getPrivacy()))
+                        ls.add(toTaskAnswer(rp, time, time.plus(diff)));
+                    time = time.plus(per).plus(dur);
+                }
+            }
+        }
+        return ls;
+    }
+
+
     private TaskAnswer toTaskAnswer(Task task) {
         return new TaskAnswer(task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
                 task.getColor(), task.getStart(), task.getEnd(), task.getPushTemplate(),(task.getRepeatTask() != null ? task.getRepeatTask().getId() : null));
