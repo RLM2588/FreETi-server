@@ -41,11 +41,33 @@ public class TaskTemplate {
     @Enumerated(EnumType.STRING)
     private Privacy privacy;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private Color color;
+    public LocalDateTime getEnding() {
+        return ending;
+    }
 
-    public TaskTemplate(String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, Color color) {
+    public void setEnding(LocalDateTime ending) {
+        this.ending = ending;
+    }
+
+    public int getImportance() {
+        return importance;
+    }
+
+    public void setImportance(int importance) {
+        this.importance = importance;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    @Column
+    private int importance;
+
+    @Column
+    private String color;
+
+    public TaskTemplate(String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, String color) {
         this.body = body;
         this.createdAt = createdAt;
         this.isEdited = isEdited;
@@ -75,12 +97,8 @@ public class TaskTemplate {
         this.privacy = privacy;
     }
 
-    public Color getColor() {
+    public String getColor() {
         return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
     }
 
     public String getBody() {
@@ -122,4 +140,6 @@ public class TaskTemplate {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+
 }

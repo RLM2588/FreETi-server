@@ -289,12 +289,12 @@ public class TaskService {
 
     private TaskAnswer toTaskAnswer(Task task) {
         return new TaskAnswer(task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
-                task.getColor(), task.getStart(), task.getEnd(), task.getPushTemplate(),(task.getRepeatTask() != null ? task.getRepeatTask().getId() : null));
+                task.getColor(), task.getStart(), task.getEnd(), task.getPushTemplate(),task.getImportance(),task.getCreatedAt());
     }
 
     private TaskAnswer toTaskAnswer(RepeatTask rp, LocalDateTime start, LocalDateTime end) {
         return new TaskAnswer(rp.getTitle(), rp.getBody(), rp.getStatus(), rp.getPrivacy(),
-                rp.getColor(), start, end, rp.getPushTemplate(), null);
+                rp.getColor(), start, end, rp.getPushTemplate(), rp.getImportance(),rp.getCreatedAt());
     }
 
 }
