@@ -3,7 +3,6 @@ package ru.parovozik.backend.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
-import ru.parovozik.backend.model.Color;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 
@@ -23,6 +22,10 @@ public class Task extends TaskTemplate{
     )
     private UUID id;
 
+
+    @Column(name = "client_uuid", unique = true, nullable = false, updatable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
+    private UUID clientUuid;
+
     @Column(length = 80)
     private String title;
 
@@ -38,8 +41,9 @@ public class Task extends TaskTemplate{
     public Task() {
     }
 
-    public Task(String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, String color, UUID id, RepeatTask repeatTask, User userId, PushTemplate pushTemplate) {
+    public Task(UUID clientUuid, String title, String body, LocalDateTime createdAt, boolean isEdited, LocalDateTime start, LocalDateTime end, Status status, Privacy privacy, String color, UUID id, RepeatTask repeatTask, User userId, PushTemplate pushTemplate) {
         super(body, createdAt, isEdited, start, end, status, privacy, color);
+        this.clientUuid = clientUuid;
         this.title = title;
         this.id = id;
         this.repeatTask = repeatTask;
@@ -58,6 +62,10 @@ public class Task extends TaskTemplate{
     public User getUser() {
         return user;
     }
+
+    public UUID getClientUuid() {return clientUuid;}
+
+    public void setClientUuid(UUID clientUuid) {this.clientUuid = clientUuid;}
 
     public void setUser(User user) {
         this.user = user;

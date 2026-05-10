@@ -3,7 +3,6 @@ package ru.parovozik.backend.service;
 
 
 import jakarta.transaction.Transactional;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import ru.parovozik.backend.dto.TaskAnswer;
 import ru.parovozik.backend.dto.TaskRequest;
@@ -12,7 +11,6 @@ import ru.parovozik.backend.entity.PushTemplate;
 import ru.parovozik.backend.entity.RepeatTask;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
-import ru.parovozik.backend.model.Color;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 import ru.parovozik.backend.repostitory.PushTemplateRepository;
@@ -21,7 +19,6 @@ import ru.parovozik.backend.repostitory.TaskRepository;
 import ru.parovozik.backend.repostitory.UserRepository;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
-import javax.swing.plaf.nimbus.State;
 import java.time.*;
 import java.util.*;
 
@@ -56,8 +53,8 @@ public class TaskService {
         task.setEdited(false);
         if(user!=null) {
             task.setUserId(user);
+            task.setClientUuid(taskRequest.id());
             taskRepository.save(task);
-            System.out.println("YASOSALTRUMP!#**");
             return true;
         }
         return false;
@@ -88,6 +85,25 @@ public class TaskService {
             return true;
         }
         return false;
+    }
+
+    private void updateFields(Task task, TaskAnswer incomingTask) {
+        task.setTitle(incomingTask.title());
+        task.setBody(incomingTask.body());
+
+        task.setStart(toLocalDateTime(incomingTask.start()));
+        task.setEnding(toLocalDateTime(incomingTask.time_end()));
+
+        task.setStatus(incomingTask.status());
+        task.setPrivacy(incomingTask.privacy());
+        task.setImportance(incomingTask.importance());
+        task.setColor(incomingTask.colour());
+
+        if (incomingTask.updated_at() != null) {
+            task.setCreatedAt(toLocalDateTime(incomingTask.updated_at()));
+        }
+
+        task.setEdited(true);
     }
 
     public boolean updateBody(String title, String username, LocalDateTime start, LocalDateTime end, String newBody) {
@@ -287,13 +303,14 @@ public class TaskService {
     }
 
 
-    private TaskAnswer toTaskAnswer(Task task) {
-        return new TaskAnswer(task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
+    public TaskAnswer toTaskAnswer(Task task) {
+        return new TaskAnswer(task.getClientUuid(), task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
                 task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), 1,task.getImportance(),toInstant(task.getCreatedAt()));
     }
 
+    // Нужно будет разобраться что здесь делать вместо null
     private TaskAnswer toTaskAnswer(RepeatTask rp, LocalDateTime start, LocalDateTime end) {
-        return new TaskAnswer(rp.getTitle(), rp.getBody(), rp.getStatus(), rp.getPrivacy(),
+        return new TaskAnswer(null, rp.getTitle(), rp.getBody(), rp.getStatus(), rp.getPrivacy(),
                 rp.getColor(), toInstant(start), toInstant(end), 1, rp.getImportance(),toInstant(rp.getCreatedAt()));
     }
 
@@ -306,4 +323,24 @@ public class TaskService {
         return start.toInstant(ZoneOffset.UTC);
     }
 
+
+    @Transactional
+    public Task updateTask(TaskAnswer incomingTask, String username) {
+        return taskRepository.findByClientUuidAndUser(incomingTask.id(), userRepository.findUserByUsername(username))
+                .map(existingTask -> {
+                    if (incomingTask.updated_at().isAfter(toInstant(existingTask.getCreatedAt()))) {
+                        updateFields(existingTask, incomingTask);
+                        return taskRepository.save(existingTask);
+                    }
+                    return existingTask;
+                })
+                .orElseGet(() -> {
+                    Task newTask = new Task();
+                    newTask.setClientUuid(incomingTask.id());
+                    newTask.setUser(userRepository.findUserByUsername(username));
+
+                    updateFields(newTask, incomingTask);
+                    return taskRepository.save(newTask);
+                });
+    }
 }

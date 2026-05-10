@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.parovozik.backend.dto.*;
+import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.service.AuthService;
@@ -44,10 +45,12 @@ public class TaskController {
         return taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth ,endOfMonth);
     }
 
-    /*@PatchMapping("tasks")
-    public boolean updateTask(@RequestBody TaskRequest updatedTask, @AuthenticationPrincipal UserDetails userDetails) {
+    @PatchMapping("tasks")
+    public ResponseEntity<TaskAnswer> updateTask(@RequestBody TaskAnswer incomingTask, @AuthenticationPrincipal UserDetails userDetails) {
+        Task updatedTask = taskService.updateTask(incomingTask, userDetails.getUsername());
 
-    }*/
+        return ResponseEntity.ok(taskService.toTaskAnswer(updatedTask));
+    }
 
     @PostMapping("tasks")
     public TaskAnswer addTask(@RequestBody TaskRequest newTask, @AuthenticationPrincipal UserDetails userDetails) {
