@@ -33,16 +33,34 @@ public class TaskController {
         this.userService = userService;
     }
 
+    @GetMapping("/username_id")
+    public ResponseEntity<UsernameIdAnswer> getusernameId(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(new UsernameIdAnswer(userDetails.getUsername(), userService.getUserAsUser(userDetails.getUsername()).getUserId()));
+    }
+
     @GetMapping("tasks")
-    public List<TaskAnswer> getTasks(@RequestParam(name = "yearMonth") String yearMonthEntry, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<TaskAnswer>> getTasks(@RequestParam(name = "yearMonth") String yearMonthEntry, @AuthenticationPrincipal UserDetails userDetails) {
+        System.out.println("aaaaa");
         String username = userDetails.getUsername();
         User user = userService.getUserAsUser(username);
         YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
-
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
 
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
-        return taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth ,endOfMonth);
+        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth ,endOfMonth));
+    }
+
+    @GetMapping("tasks/update")
+    public ResponseEntity<List<TaskAnswer>> getUpdatedTasks(@RequestParam(name = "yearMonth") String yearMonthEntry,
+                                            @RequestParam(name = "since") Long since, @AuthenticationPrincipal UserDetails userDetails) {
+        System.out.println("aaaaa");
+        String username = userDetails.getUsername();
+        User user = userService.getUserAsUser(username);
+        YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
+        LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
+
+        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth ,endOfMonth));
     }
 
     @PatchMapping("tasks")
@@ -84,7 +102,7 @@ public class TaskController {
     public*/
 
 
-    @PostMapping("/refresh")
+    /*@PostMapping("/refresh")
     public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         TokenResponse tokens = authService.refresh(request.getRefreshToken());
         return ResponseEntity.ok(tokens);
@@ -94,5 +112,5 @@ public class TaskController {
     public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
         authService.logout(request.getRefreshToken());
         return ResponseEntity.ok("Logged out");
-    }
+    }*/
 }

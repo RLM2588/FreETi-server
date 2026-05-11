@@ -125,6 +125,8 @@ public class AuthService {
 
         RefreshToken rt = new RefreshToken(refreshToken, user, Instant.now().plusMillis(604800000));
         refreshTokenRepository.save(rt);
+        //System.out.println(refreshToken);
+        //System.out.println(accessToken);
 
         return new TokenResponse(accessToken, refreshToken, user.getUserId(), user.getName());
     }

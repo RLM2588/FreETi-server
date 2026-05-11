@@ -1,5 +1,7 @@
 package ru.parovozik.backend.controllers;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.parovozik.backend.dto.*;
 import ru.parovozik.backend.service.AuthService;
 import jakarta.validation.Valid;
@@ -22,6 +24,8 @@ public class AuthController {
         authService.sendVerificationCode(request.getUsername(), request.getEmail());
         return ResponseEntity.ok("Code sent to " + request.getEmail());
     }
+
+
 
     @PostMapping("/final_register")
     public ResponseEntity<?> finalRegister(@Valid @RequestBody FinalRegisterRequest request) {
