@@ -1,4 +1,4 @@
 package ru.parovozik.backend.dto;
 
-public record UserAnswer(String name, String username, String link) {
+public record UserAnswer(int id, String login, String username, String avatar) {
 }

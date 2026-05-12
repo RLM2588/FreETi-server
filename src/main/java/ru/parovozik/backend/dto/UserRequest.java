@@ -1,4 +1,4 @@
 package ru.parovozik.backend.dto;
 
-public record UserRequest(String name, String username, String email, String pasword) {
+public record UserRequest(int id, String login, String username, String avatar) {
 }

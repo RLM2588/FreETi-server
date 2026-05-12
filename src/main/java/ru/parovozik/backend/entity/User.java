@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.*;
 import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.generator.EventType;
+import ru.parovozik.backend.dto.UserAnswer;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -33,8 +34,8 @@ public class User {
     @CurrentTimestamp(event = EventType.INSERT)
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Avatar avatar;
+    @Column(length = 4)
+    private String avatar;
 
     @OneToMany(mappedBy="user")
     private Set<Task> tasks;
@@ -52,7 +53,7 @@ public class User {
     @ManyToMany(mappedBy = "friends",fetch = FetchType.LAZY)
     private Set<User> friendsOf = new HashSet<>();
 
-    public User(int userId, String username, String email, String password, LocalDateTime createdAt, Avatar avatar, Set<Task> tasks, Set<RepeatTask> repeatTasks, Set<User> friends, Set<User> friendsOf) {
+    public User(int userId, String username, String email, String password, LocalDateTime createdAt, String avatar, Set<Task> tasks, Set<RepeatTask> repeatTasks, Set<User> friends, Set<User> friendsOf) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -142,11 +143,11 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public Avatar getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(Avatar avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 
@@ -165,4 +166,6 @@ public class User {
     public void setFriendsOf(Set<User> friendsOf) {
         this.friendsOf = friendsOf;
     }
+
+    public UserAnswer asUserAnswer() { return new UserAnswer(this.userId, this.username, this.name, this.avatar); }
 }

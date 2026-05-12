@@ -36,10 +36,10 @@ public class UserService {
     public boolean addUser(UserRequest userResponse) {
         try {
             User user = new User();
-            user.setUsername(userResponse.username());
-            user.setName(userResponse.name());
-            user.setEmail(userResponse.email());
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setUsername(userResponse.login());
+            user.setName(userResponse.username());
+            //user.setEmail(userResponse.email());
+            //user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             return true;
         } catch (Exception e) {
@@ -63,7 +63,7 @@ public class UserService {
 
     public UserAnswer getUser(String username) {
         User user = userRepository.findUserByUsername(username);
-        return new UserAnswer(user.getName(),user.getUsername(),user.getAvatar().getLink());
+        return new UserAnswer(user.getUserId(),user.getUsername(), user.getName(), user.getAvatar());
     }
 
     public User getUserAsUser(String username) {
@@ -75,7 +75,15 @@ public class UserService {
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Неверный email или пароль");
         }
-        return new UserAnswer(user.getName(),user.getUsername(),user.getAvatar().getLink());
+        return new UserAnswer(user.getUserId(),user.getUsername(), user.getName(), user.getAvatar());
+    }
+
+    public List<UserAnswer> getUsersByPartName(String name) {
+        return userRepository.findByNameContainingIgnoreCase(name).stream().map((User::asUserAnswer)).toList();
+    }
+
+    public List<UserAnswer> getUsersByPartUsername(String username) {
+        return userRepository.findByUsernameContainingIgnoreCase(username).stream().map((User::asUserAnswer)).toList();
     }
 
     public boolean updatePassword(String email, String password, String newPassword) {
@@ -96,7 +104,7 @@ public class UserService {
         if (user != null) {
             List<User> users = userRepository.findFriends(user.getUserId());
             for(User one : users) {
-                userAnswers.add(new UserAnswer(user.getName(),user.getUsername(),user.getAvatar().getLink()));
+                userAnswers.add(new UserAnswer(user.getUserId(), user.getUsername(), user.getName(), user.getAvatar()));
             }
         }
         return userAnswers;
@@ -130,18 +138,17 @@ public class UserService {
 
 
     @Transactional
-    public boolean updateAvatar(String username, String link) {
+    public boolean updateAvatar(String username, String avatar) {
         User user = userRepository.findUserByUsername(username);
-        Avatar avatar =  avatarRepository.findByLink(link);
         if(user != null) {
             if(avatar != null) {
                 user.setAvatar(avatar);
             }
-            else {
+/*            else {
                 Avatar avatar1 = new Avatar();
                 avatar1.setLink(link);
                 avatarRepository.save(avatar1);
-            }
+            }*/
             userRepository.save(user);
             return true;
         }

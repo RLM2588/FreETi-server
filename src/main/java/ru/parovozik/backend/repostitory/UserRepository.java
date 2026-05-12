@@ -13,6 +13,10 @@ import java.util.List;
 public interface UserRepository extends CrudRepository<User,Integer> {
     User findUserByUsername(String username);
 
+    List<User> findByNameContainingIgnoreCase(String namePart);
+
+    List<User> findByUsernameContainingIgnoreCase(String usernamePart);
+
     User findByEmail(String email);
 
     @Modifying
