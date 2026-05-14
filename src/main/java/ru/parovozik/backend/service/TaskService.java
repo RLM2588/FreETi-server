@@ -4,6 +4,7 @@ package ru.parovozik.backend.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import ru.parovozik.backend.dto.OtherTaskAnswer;
 import ru.parovozik.backend.dto.TaskAnswer;
 import ru.parovozik.backend.dto.TaskRequest;
 import ru.parovozik.backend.dto.UpdateTime;
@@ -215,15 +216,59 @@ public class TaskService {
     }
 
     @Transactional
-    public List<TaskAnswer> returnFriendTasks(String username) {
+    public List<OtherTaskAnswer> returnFriendTasks(String username, String yearMonthEntry) {
         User user = userRepository.findUserByUsername(username);
-        return returnTasks(user,List.of(Privacy.FRIENDS,Privacy.PUBLIC));
+        int lastIndex = yearMonthEntry.lastIndexOf('-');
+        String ym = yearMonthEntry.substring(0, lastIndex);
+        int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
+
+        LocalDateTime startOfMonth;
+        LocalDateTime endOfMonth;
+
+        YearMonth yearMonth = YearMonth.parse(ym);
+        if (day == 1) {
+            endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
+            yearMonth.minusMonths(1);
+            startOfMonth = yearMonth.atEndOfMonth().atStartOfDay();
+        }
+        else if (!yearMonth.isValidDay(day + 1)) {
+            startOfMonth = yearMonth.atDay(day - 1).atStartOfDay();
+            yearMonth.plusMonths(1);
+            endOfMonth = yearMonth.atDay(1).atTime(LocalTime.MAX);
+        }
+        else {
+            startOfMonth = yearMonth.atDay(1).atStartOfDay();
+            endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+        }
+        return returnOtherTasksByMonth(user, List.of(Privacy.FRIENDS, Privacy.PUBLIC), startOfMonth, endOfMonth);
     }
 
     @Transactional
-    public List<TaskAnswer> returnOrdinalTasks(String username) {
+    public List<OtherTaskAnswer> returnOrdinalTasks(String username, String yearMonthEntry) {
         User user = userRepository.findUserByUsername(username);
-        return returnTasks(user,List.of(Privacy.PUBLIC));
+        int lastIndex = yearMonthEntry.lastIndexOf('-');
+        String ym = yearMonthEntry.substring(0, lastIndex);
+        int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
+
+        LocalDateTime startOfMonth;
+        LocalDateTime endOfMonth;
+
+        YearMonth yearMonth = YearMonth.parse(ym);
+        if (day == 1) {
+            endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
+            yearMonth.minusMonths(1);
+            startOfMonth = yearMonth.atEndOfMonth().atStartOfDay();
+        }
+        else if (!yearMonth.isValidDay(day + 1)) {
+            startOfMonth = yearMonth.atDay(day - 1).atStartOfDay();
+            yearMonth.plusMonths(1);
+            endOfMonth = yearMonth.atDay(1).atTime(LocalTime.MAX);
+        }
+        else {
+            startOfMonth = yearMonth.atDay(1).atStartOfDay();
+            endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+        }
+        return returnOtherTasksByMonth(user, List.of(Privacy.PUBLIC), startOfMonth, endOfMonth);
     }
 
     private List<TaskAnswer> returnTasks(User user, List<Privacy> pr) {
@@ -232,7 +277,7 @@ public class TaskService {
         LocalDateTime minus = now.minusMonths(1);
         LocalDateTime plus   = now.plusMonths(1);
         if(user != null) {
-            List<Task> tasks = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIsNull(user, minus,plus);
+            List<Task> tasks = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIsNull(user, minus, plus);
             for(Task task : tasks) {
                 if(pr.contains(task.getPrivacy()))
                     ls.add(toTaskAnswer(task));
@@ -264,31 +309,28 @@ public class TaskService {
         return ls;
     }
 
-    public List<TaskAnswer> returnTasksByMonth(User user, List<Privacy> pr,LocalDateTime start, LocalDateTime end) {
+    public List<TaskAnswer> returnTasksByMonth(User user, List<Privacy> pr, LocalDateTime start, LocalDateTime end) {
         List<TaskAnswer> ls = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime minus = start;
-        LocalDateTime plus   = end;
         if(user != null) {
-            List<Task> tasks = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIsNull(user, minus,plus);
+            List<Task> tasks = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIsNull(user, start, end);
             for(Task task : tasks) {
                 if(pr.contains(task.getPrivacy()))
                     ls.add(toTaskAnswer(task));
             }
-            List<RepeatTask> repeatTasks = repeatTaskRepository.findRepeatTaskByUserAndGlobalEndAfter(user, minus);
+            List<RepeatTask> repeatTasks = repeatTaskRepository.findRepeatTaskByUserAndGlobalEndAfter(user, start);
             Map<LocalDateTime, Task> overrides = new HashMap<>();
             List<Task> allOverrides = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIn(
-                    user, minus,plus, repeatTasks);
+                    user, start, end, repeatTasks);
             allOverrides.forEach(t -> overrides.put(t.getStart(), t));
             for(RepeatTask rp : repeatTasks) {
                 LocalDateTime time = rp.getStart();
                 Period per = rp.getBeforeHowDays();
                 Duration dur = rp.getBeforeHowHours();
                 Duration diff = Duration.between(rp.getStart(), rp.getEnd());
-                while(!time.isAfter(minus)) {
+                while(!time.isAfter(start)) {
                     time = time.plus(per).plus(dur);
                 }
-                while(time.isBefore(plus) || time.isBefore(rp.getGlobalEnd())) {
+                while(time.isBefore(end) || time.isBefore(rp.getGlobalEnd())) {
                     Task taskFind = overrides.get(time);
                     if (taskFind != null && pr.contains(taskFind.getPrivacy()))
                         ls.add(toTaskAnswer(taskFind));
@@ -302,10 +344,50 @@ public class TaskService {
         return ls;
     }
 
+    public List<OtherTaskAnswer> returnOtherTasksByMonth(User user, List<Privacy> pr, LocalDateTime start, LocalDateTime end) {
+        List<OtherTaskAnswer> ls = new ArrayList<>();
+        if(user != null) {
+            List<Task> tasks = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIsNull(user, start, end);
+            for(Task task : tasks) {
+                if(pr.contains(task.getPrivacy()))
+                    ls.add(toOtherTaskAnswer(task));
+            }
+            List<RepeatTask> repeatTasks = repeatTaskRepository.findRepeatTaskByUserAndGlobalEndAfter(user, start);
+            Map<LocalDateTime, Task> overrides = new HashMap<>();
+            List<Task> allOverrides = taskRepository.findByUserAndEndingBetweenAndRepeatTaskIn(
+                    user, start, end, repeatTasks);
+            allOverrides.forEach(t -> overrides.put(t.getStart(), t));
+            /*for(RepeatTask rp : repeatTasks) {
+                LocalDateTime time = rp.getStart();
+                Period per = rp.getBeforeHowDays();
+                Duration dur = rp.getBeforeHowHours();
+                Duration diff = Duration.between(rp.getStart(), rp.getEnd());
+                while(!time.isAfter(start)) {
+                    time = time.plus(per).plus(dur);
+                }
+                while(time.isBefore(end) || time.isBefore(rp.getGlobalEnd())) {
+                    Task taskFind = overrides.get(time);
+                    if (taskFind != null && pr.contains(taskFind.getPrivacy()))
+                        ls.add(toOtherTaskAnswer(taskFind));
+                    else
+                    if(pr.contains(rp.getPrivacy()))
+                        ls.add(toTaskAnswer(rp, time, time.plus(diff)));
+                    time = time.plus(per).plus(dur);
+                }
+            }*/
+            // #TODO потом будут повторяющиеся задачи
+        }
+        return ls;
+    }
+
 
     public TaskAnswer toTaskAnswer(Task task) {
         return new TaskAnswer(task.getClientUuid(), task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
                 task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), 1,task.getImportance(),toInstant(task.getCreatedAt()));
+    }
+
+    public OtherTaskAnswer toOtherTaskAnswer(Task task) {
+        return new OtherTaskAnswer(task.getClientUuid(), task.getTitle(), task.getBody(), task.getUserId().getUserId(), task.getStatus(), task.getPrivacy(), task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), task.getPushTemplate().getPushId(), task.getImportance());
     }
 
     // Нужно будет разобраться что здесь делать вместо null

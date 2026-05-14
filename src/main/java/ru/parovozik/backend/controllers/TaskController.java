@@ -18,6 +18,7 @@ import ru.parovozik.backend.service.UserService;
 
 import java.time.*;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -33,6 +34,14 @@ public class TaskController {
         this.userService = userService;
     }
 
+    @GetMapping("/othertasks")
+    public ResponseEntity<List<OtherTaskAnswer>> getOtherUserTasks(@Param("yearMonth") String yearMonth, @Param("login") String login, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userService.findFriend(userDetails.getUsername()).stream().anyMatch((userAnswer -> Objects.equals(userAnswer.username(), login)))) {
+            return ResponseEntity.ok(taskService.returnFriendTasks(login, yearMonth));
+        }
+        return ResponseEntity.ok(taskService.returnOrdinalTasks(login, yearMonth));
+    }
+
     @GetMapping("/username_id")
     public ResponseEntity<UsernameIdAnswer> getusernameId(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(new UsernameIdAnswer(userDetails.getUsername(), userService.getUserAsUser(userDetails.getUsername()).getUserId()));
@@ -40,27 +49,25 @@ public class TaskController {
 
     @GetMapping("tasks")
     public ResponseEntity<List<TaskAnswer>> getTasks(@RequestParam(name = "yearMonth") String yearMonthEntry, @AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println("aaaaa");
         String username = userDetails.getUsername();
         User user = userService.getUserAsUser(username);
         YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
 
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
-        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth ,endOfMonth));
+        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
     }
 
     @GetMapping("tasks/update")
     public ResponseEntity<List<TaskAnswer>> getUpdatedTasks(@RequestParam(name = "yearMonth") String yearMonthEntry,
-                                            @RequestParam(name = "since") Long since, @AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println("aaaaa");
+                                                            @RequestParam(name = "since") Long since, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         User user = userService.getUserAsUser(username);
         YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
 
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
-        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth ,endOfMonth));
+        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
     }
 
     @PatchMapping("tasks")
@@ -72,11 +79,12 @@ public class TaskController {
 
     @PostMapping("tasks")
     public TaskAnswer addTask(@RequestBody TaskRequest newTask, @AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println(taskService.createTask(newTask,userDetails.getUsername()));
-        return taskService.getTask(newTask.title(),userDetails.getUsername(), toLocalDateTime(newTask.start()),  toLocalDateTime(newTask.time_end()));
+        //System.out.println(taskService.createTask(newTask,userDetails.getUsername()));
+        return taskService.getTask(newTask.title(), userDetails.getUsername(), toLocalDateTime(newTask.start()), toLocalDateTime(newTask.time_end()));
     }
 
-    private LocalDateTime toLocalDateTime(Instant start) {;//парсинг для бд
+    private LocalDateTime toLocalDateTime(Instant start) {
+        ;//парсинг для бд
         long epochSec = start.getEpochSecond();
         return Instant.ofEpochMilli(epochSec).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }

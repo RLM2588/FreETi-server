@@ -128,6 +128,6 @@ public class AuthService {
         //System.out.println(refreshToken);
         //System.out.println(accessToken);
 
-        return new TokenResponse(accessToken, refreshToken, user.getUserId(), user.getName());
+        return new TokenResponse(accessToken, refreshToken, user.getUserId(), user.getUsername());
     }
 }

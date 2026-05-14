@@ -32,7 +32,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PutMapping("/update")
+    @PutMapping("/id")
     public ResponseEntity<UserAnswer> updateUser(@RequestBody UserRequest userRequest,
                                                  @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
@@ -61,7 +61,7 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<List<UserAnswer>> getUserByPartUsername(@RequestBody String login) {
+    public ResponseEntity<List<UserAnswer>> getUserByPartUsername(@Param("login") String login) {
         try {
             List<UserAnswer> userAnswer = userService.getUsersByPartUsername(login);
             if (userAnswer == null) return ResponseEntity.ok(List.of());
