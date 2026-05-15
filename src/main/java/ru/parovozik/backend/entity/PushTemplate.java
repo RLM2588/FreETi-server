@@ -30,7 +30,7 @@ public class PushTemplate {
     }
 
     public int getPushId() {
-        return pushId;
+        /*return pushId;*/ return 1;
     }
 
     public void setPushId(int pushId) {

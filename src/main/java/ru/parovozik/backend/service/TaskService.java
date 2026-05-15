@@ -224,7 +224,7 @@ public class TaskService {
 
         LocalDateTime startOfMonth;
         LocalDateTime endOfMonth;
-
+        System.out.println(yearMonthEntry + " " + ym + " " + String.valueOf(day));
         YearMonth yearMonth = YearMonth.parse(ym);
         if (day == 1) {
             endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
@@ -249,6 +249,8 @@ public class TaskService {
         int lastIndex = yearMonthEntry.lastIndexOf('-');
         String ym = yearMonthEntry.substring(0, lastIndex);
         int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
+
+        System.out.println(yearMonthEntry + " " + ym + " " + String.valueOf(day));
 
         LocalDateTime startOfMonth;
         LocalDateTime endOfMonth;
@@ -387,7 +389,7 @@ public class TaskService {
     }
 
     public OtherTaskAnswer toOtherTaskAnswer(Task task) {
-        return new OtherTaskAnswer(task.getClientUuid(), task.getTitle(), task.getBody(), task.getUserId().getUserId(), task.getStatus(), task.getPrivacy(), task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), task.getPushTemplate().getPushId(), task.getImportance());
+        return new OtherTaskAnswer(task.getClientUuid(), task.getTitle(), task.getBody(), task.getUserId().getUserId(), task.getStatus(), task.getPrivacy(), task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), 1, task.getImportance());
     }
 
     // Нужно будет разобраться что здесь делать вместо null

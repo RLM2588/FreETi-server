@@ -33,6 +33,11 @@ public class GroupService {
         return groupUsersRepository.findAllByUser(user);
     }
 
+    public List<GroupAnswer> getUserGroupsAsAnswer(String username)  {
+        User user = userRepository.findUserByUsername(username);
+        return groupUsersRepository.findAllByUser(user).stream().map(groupsUsers -> groupsUsers.getGroup().toGroupAnswer()).toList();
+    }
+
     public Groups getGroupInfo(UUID uuid)  {
         return groupsRepository.getById(uuid);
     }

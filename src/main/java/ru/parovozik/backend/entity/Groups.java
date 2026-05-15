@@ -70,4 +70,6 @@ public class Groups {
     public void setBody(String body) {
         this.body = body;
     }
+
+    public GroupAnswer toGroupAnswer() {return new GroupAnswer(id, title, body, false); }
 }
