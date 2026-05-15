@@ -47,7 +47,7 @@ public class TaskController {
         return ResponseEntity.ok(new UsernameIdAnswer(userDetails.getUsername(), userService.getUserAsUser(userDetails.getUsername()).getUserId()));
     }
 
-    @GetMapping("tasks")
+    @GetMapping("/tasks")
     public ResponseEntity<List<TaskAnswer>> getTasks(@RequestParam(name = "yearMonth") String yearMonthEntry, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         User user = userService.getUserAsUser(username);
@@ -58,7 +58,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
     }
 
-    @GetMapping("tasks/update")
+    @GetMapping("/tasks/update")
     public ResponseEntity<List<TaskAnswer>> getUpdatedTasks(@RequestParam(name = "yearMonth") String yearMonthEntry,
                                                             @RequestParam(name = "since") Long since, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
@@ -68,6 +68,13 @@ public class TaskController {
 
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
         return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
+    }
+
+    @GetMapping("/unassigned")
+    public ResponseEntity<List<TaskAnswer>> getUnassigned(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        User user = userService.getUserAsUser(username);
+        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), toLocalDateTime(Instant.ofEpochMilli(0)), toLocalDateTime(Instant.ofEpochMilli(0))));
     }
 
     @PatchMapping("tasks")

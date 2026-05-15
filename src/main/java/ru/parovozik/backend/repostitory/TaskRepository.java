@@ -19,7 +19,7 @@ public interface TaskRepository extends CrudRepository<Task, UUID> {
     Task findByTitleAndStartAndEndingAndUser(String title, LocalDateTime start, LocalDateTime ending, User user);
     Optional<Task> findByClientUuidAndUser(UUID client_uuid, User user);
 
-
+    // TODO нужно бы искать по тому, находится ли начало в данном промежутке
     List<Task> findByUserAndEndingBetweenAndRepeatTaskIsNull(User user, LocalDateTime start, LocalDateTime end);
     List<Task> findAllByUserAndRepeatTask(User user, RepeatTask repeatTask);
 

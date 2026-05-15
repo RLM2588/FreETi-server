@@ -16,6 +16,7 @@ import ru.parovozik.backend.service.TaskService;
 import ru.parovozik.backend.service.UserService;
 
 import java.time.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -72,6 +73,16 @@ public class UserController {
             return (ResponseEntity<List<UserAnswer>>) ResponseEntity.notFound();
         }
     }
+
+    @GetMapping("/byIds")
+    public ResponseEntity<List<UserAnswer>> getUsersByIds(@Param("ids") String ids) {
+        return ResponseEntity.ok(
+                Arrays.stream(ids.split(","))
+                        .map(id -> userService.getUserById(Integer.parseInt(id)))
+                        .filter(Objects::nonNull)
+                        .toList());
+    }
+
 
 
 }

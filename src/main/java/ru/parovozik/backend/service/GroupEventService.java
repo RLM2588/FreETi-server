@@ -15,6 +15,7 @@ import ru.parovozik.backend.repostitory.GroupsRepository;
 import ru.parovozik.backend.repostitory.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,15 +32,15 @@ public class GroupEventService {
 
     public UUID createGroupTask(GroupTaskRequest taskRequest) {
         try {
-        GroupEvents task = new GroupEvents();
-        User user = userRepository.findUserByUsername(taskRequest.username());
-        task.setTitle(taskRequest.title());
-        task.setBody(taskRequest.body());
-        task.setPushTemplate(taskRequest.pushTemplate());
-        task.setColor(taskRequest.color());
-        task.setPrivacy(taskRequest.privacy());
-        task.setStatus(taskRequest.status());
-        task.setGroup(groupsRepository.getById(taskRequest.group()));
+            GroupEvents task = new GroupEvents();
+            User user = userRepository.findUserByUsername(taskRequest.username());
+            task.setTitle(taskRequest.title());
+            task.setBody(taskRequest.body());
+            task.setPushTemplate(taskRequest.pushTemplate());
+            task.setColor(taskRequest.color());
+            task.setPrivacy(taskRequest.privacy());
+            task.setStatus(taskRequest.status());
+            task.setGroup(groupsRepository.getById(taskRequest.group()));
             if(user!=null) {
                 task.setCreateByUser(user);
                 groupEventsRepository.save(task);
@@ -186,7 +187,4 @@ public class GroupEventService {
             throw new IllegalArgumentException(e);
         }
     }
-
-
-
 }

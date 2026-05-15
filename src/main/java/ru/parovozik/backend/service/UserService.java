@@ -61,6 +61,12 @@ public class UserService {
         }
     }
 
+    public UserAnswer getUserById(int id) {
+        User user = userRepository.findUserByUserId(id);
+        if (user == null) return null;
+        return user.asUserAnswer();
+    }
+
     public UserAnswer getUser(String username) {
         User user = userRepository.findUserByUsername(username);
         return new UserAnswer(user.getUserId(),user.getUsername(), user.getName(), user.getAvatar());
@@ -104,7 +110,7 @@ public class UserService {
         if (user != null) {
             List<User> users = userRepository.findFriends(user.getUserId());
             for(User one : users) {
-                userAnswers.add(new UserAnswer(user.getUserId(), user.getUsername(), user.getName(), user.getAvatar()));
+                userAnswers.add(new UserAnswer(one.getUserId(), one.getUsername(), one.getName(), one.getAvatar()));
             }
         }
         return userAnswers;

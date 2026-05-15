@@ -87,7 +87,7 @@ public class GroupService {
             groupUsersRepository.save(groupsUsers);
             return true;
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            return false;
         }
     }
 
