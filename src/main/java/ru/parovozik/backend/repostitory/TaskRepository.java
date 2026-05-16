@@ -1,11 +1,15 @@
 package ru.parovozik.backend.repostitory;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import ru.parovozik.backend.entity.RepeatTask;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
+import ru.parovozik.backend.model.Privacy;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -25,4 +29,15 @@ public interface TaskRepository extends CrudRepository<Task, UUID> {
 
     List<Task> findByUserAndEndingBetweenAndRepeatTaskIn(User user, LocalDateTime endingAfter, LocalDateTime endingBefore, Collection<RepeatTask> repeatTasks);
 
+    @Query("SELECT t FROM Task t " +
+            "WHERE t.user.userId IN :userIds " +
+            "AND t.privacy IN :privacies " +
+            "AND t.start < :endPeriod " +
+            "AND t.ending > :startPeriod")
+    List<Task> findTasksForUsersInPeriod(
+            @Param("userIds") List<Integer> userIds,
+            @Param("privacies") List<Privacy> privacies,
+            @Param("startPeriod") LocalDateTime startPeriod,
+            @Param("endPeriod") LocalDateTime endPeriod
+    );
 }

@@ -6,13 +6,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.parovozik.backend.dto.*;
+import ru.parovozik.backend.entity.Contact;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
 import ru.parovozik.backend.model.Privacy;
+import ru.parovozik.backend.repostitory.ContactRepository;
 import ru.parovozik.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.parovozik.backend.service.ContactService;
 import ru.parovozik.backend.service.TaskService;
 import ru.parovozik.backend.service.UserService;
 
@@ -27,18 +30,28 @@ public class TaskController {
     private final AuthService authService;
     private final TaskService taskService;
     private final UserService userService;
+    private final ContactService contactService;
+    private final ContactRepository contactRepository;
 
-    public TaskController(AuthService authService, TaskService taskService, UserService userService) {
+
+    public TaskController(AuthService authService, TaskService taskService, UserService userService, ContactService contactService, ContactRepository contactRepository) {
         this.authService = authService;
         this.taskService = taskService;
         this.userService = userService;
+        this.contactService = contactService;
+        this.contactRepository = contactRepository;
     }
 
     @GetMapping("/othertasks")
-    public ResponseEntity<List<OtherTaskAnswer>> getOtherUserTasks(@Param("yearMonth") String yearMonth, @Param("login") String login, @AuthenticationPrincipal UserDetails userDetails) {
-        if (userService.findFriend(userDetails.getUsername()).stream().anyMatch((userAnswer -> Objects.equals(userAnswer.username(), login)))) {
+    public ResponseEntity<List<OtherTaskAnswer>> getOtherUserTasks(@RequestParam("yearMonth") String yearMonth, @RequestParam("login") String login, @AuthenticationPrincipal UserDetails userDetails) {
+        User userReq = userService.getUserAsUser(userDetails.getUsername());
+        User secondUser = userService.getUserAsUser(login);
+        Contact contact = contactRepository.findAllByFirstAndSecond(userReq, secondUser);
+        if (contact == null) return (ResponseEntity<List<OtherTaskAnswer>>) ResponseEntity.badRequest();
+
+        if (contact.isFriend())
             return ResponseEntity.ok(taskService.returnFriendTasks(login, yearMonth));
-        }
+
         return ResponseEntity.ok(taskService.returnOrdinalTasks(login, yearMonth));
     }
 
@@ -84,7 +97,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.toTaskAnswer(updatedTask));
     }
 
-    @PostMapping("tasks")
+    @PostMapping("/tasks")
     public TaskAnswer addTask(@RequestBody TaskRequest newTask, @AuthenticationPrincipal UserDetails userDetails) {
         //System.out.println(taskService.createTask(newTask,userDetails.getUsername()));
         return taskService.getTask(newTask.title(), userDetails.getUsername(), toLocalDateTime(newTask.start()), toLocalDateTime(newTask.time_end()));

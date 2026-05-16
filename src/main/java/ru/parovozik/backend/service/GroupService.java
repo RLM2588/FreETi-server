@@ -55,6 +55,11 @@ public class GroupService {
         }
     }
 
+    public List<GroupsUsers> getUsersByGroup(UUID groupId) {
+        Groups group = getGroupInfo(groupId);
+        return groupUsersRepository.findAllByGroup(group);
+    }
+
 
     @Transactional
     public boolean deleteGroup(UUID uuid) {

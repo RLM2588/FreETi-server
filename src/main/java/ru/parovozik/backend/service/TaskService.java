@@ -37,6 +37,12 @@ public class TaskService {
         this.pushTemplateRepository = pushTemplateRepository;
     }
 
+    public List<TaskAnswer> returnTasksForUsersInPeriod(List<Integer> userIds,
+                                                        List<Privacy> privacyList,
+                                                        Instant globalStart,
+                                                        Instant globalEnd) {
+        return taskRepository.findTasksForUsersInPeriod(userIds, privacyList, toLocalDateTime(globalStart), toLocalDateTime(globalEnd)).stream().map(Task::toTaskAnswer).toList();
+    }
 
     public boolean createTask(TaskRequest taskRequest, String username) {
         Task task = new Task();
@@ -224,7 +230,7 @@ public class TaskService {
 
         LocalDateTime startOfMonth;
         LocalDateTime endOfMonth;
-        System.out.println(yearMonthEntry + " " + ym + " " + String.valueOf(day));
+//        System.out.println(yearMonthEntry + " " + ym + " " + String.valueOf(day));
         YearMonth yearMonth = YearMonth.parse(ym);
         if (day == 1) {
             endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
@@ -398,12 +404,12 @@ public class TaskService {
                 rp.getColor(), toInstant(start), toInstant(end), 1, rp.getImportance(),toInstant(rp.getCreatedAt()));
     }
 
-    private LocalDateTime toLocalDateTime(Instant start) {
+    public LocalDateTime toLocalDateTime(Instant start) {
         long epochSec = start.getEpochSecond();
         return Instant.ofEpochMilli(epochSec).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    private Instant toInstant(LocalDateTime start) {
+    public Instant toInstant(LocalDateTime start) {
         return start.toInstant(ZoneOffset.UTC);
     }
 

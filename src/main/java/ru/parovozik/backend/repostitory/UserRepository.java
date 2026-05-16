@@ -20,11 +20,4 @@ public interface UserRepository extends CrudRepository<User,Integer> {
     List<User> findByUsernameContainingIgnoreCase(String usernamePart);
 
     User findByEmail(String email);
-
-    @Modifying
-    @Query(value = "DELETE FROM user_contacts WHERE user_id = :userId OR contact_id = :userId", nativeQuery = true)
-    void deleteContacts(@Param("userId") long userId);
-
-    @Query("SELECT DISTINCT c FROM User u JOIN u.friends c WHERE u.userId = :userId")
-    List<User> findFriends(@Param("userId") long userId);
 }

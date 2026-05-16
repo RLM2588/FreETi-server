@@ -15,6 +15,8 @@ public interface GroupUsersRepository extends CrudRepository<GroupsUsers,Long> {
 
     List<GroupsUsers> findAllByUser(User user);
 
+    List<GroupsUsers> findAllByGroup(Groups group);
+
     void deleteAllByGroup(Groups group);
 
     GroupsUsers findByUserAndGroup(User user, Groups group);

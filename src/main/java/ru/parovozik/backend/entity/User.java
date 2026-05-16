@@ -43,16 +43,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<RepeatTask> repeatTasks;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name="Contacts",
-            joinColumns=@JoinColumn(name="userId"),
-            inverseJoinColumns=@JoinColumn(name="contactId")
-    )
-    private Set<User> friends = new HashSet<>();
-
-    @ManyToMany(mappedBy = "friends",fetch = FetchType.LAZY)
-    private Set<User> friendsOf = new HashSet<>();
-
     public User(int userId, String username, String email, String password, LocalDateTime createdAt, String avatar, Set<Task> tasks, Set<RepeatTask> repeatTasks, Set<User> friends, Set<User> friendsOf) {
         this.userId = userId;
         this.username = username;
@@ -62,8 +52,7 @@ public class User {
         this.avatar = avatar;
         this.tasks = tasks;
         this.repeatTasks = repeatTasks;
-        this.friends = friends;
-        this.friendsOf = friendsOf;
+
     }
 
     public Set<Task> getTasks() {
@@ -80,16 +69,6 @@ public class User {
 
     public void setRepeatTasks(Set<RepeatTask> repeatTasks) {
         this.repeatTasks = repeatTasks;
-    }
-
-    public void addFollower(User follower) {
-        this.friends.add(follower);
-        follower.getFriends().add(this);
-    }
-
-    public void removeFollower(User follower) {
-        this.friends.remove(follower);
-        follower.getFriends().remove(this);
     }
 
     public User() {
@@ -149,22 +128,6 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-    }
-
-    public Set<User> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(Set<User> friends) {
-        this.friends = friends;
-    }
-
-    public Set<User> getFriendsOf() {
-        return friendsOf;
-    }
-
-    public void setFriendsOf(Set<User> friendsOf) {
-        this.friendsOf = friendsOf;
     }
 
     public UserAnswer asUserAnswer() { return new UserAnswer(this.userId, this.username, this.name, this.avatar); }

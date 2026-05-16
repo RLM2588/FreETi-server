@@ -23,14 +23,16 @@ public class UserService {
     private final GroupUsersRepository groupUsersRepository;
     private final PasswordEncoder passwordEncoder;
     private final AvatarRepository avatarRepository;
+    private final ContactRepository contactRepository;
 
-    public UserService(UserRepository userRepository, TaskRepository taskRepository, RepeatTaskRepository repeatTaskRepository, GroupUsersRepository groupUsersRepository, PasswordEncoder passwordEncoder, AvatarRepository avatarRepository) {
+    public UserService(UserRepository userRepository, TaskRepository taskRepository, RepeatTaskRepository repeatTaskRepository, GroupUsersRepository groupUsersRepository, PasswordEncoder passwordEncoder, AvatarRepository avatarRepository, ContactRepository contactRepository) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.repeatTaskRepository = repeatTaskRepository;
         this.groupUsersRepository = groupUsersRepository;
         this.passwordEncoder = passwordEncoder;
         this.avatarRepository = avatarRepository;
+        this.contactRepository = contactRepository;
     }
 
     public boolean addUser(UserRequest userResponse) {
@@ -104,43 +106,6 @@ public class UserService {
         }
     }
 
-    public List<UserAnswer> findFriend(String username) {
-        User user = userRepository.findUserByUsername(username);
-        List<UserAnswer> userAnswers = new ArrayList<>();
-        if (user != null) {
-            List<User> users = userRepository.findFriends(user.getUserId());
-            for(User one : users) {
-                userAnswers.add(new UserAnswer(one.getUserId(), one.getUsername(), one.getName(), one.getAvatar()));
-            }
-        }
-        return userAnswers;
-    }
-
-    @Transactional
-    public void addFriend(String usernameTo, String usernameFrom) {
-        User user1 = userRepository.findUserByUsername(usernameTo);
-        User user2 = userRepository.findUserByUsername(usernameFrom);
-        if(user1 != null && user2 != null) {
-            user1.getFriends().add(user2);
-            user2.getFriendsOf().add(user1);
-        }
-        else {
-            throw new IllegalArgumentException("User or users not found");
-        }
-    }
-
-    @Transactional
-    public void deleteFriend(String usernameTo, String usernameFrom) {
-        User user1 = userRepository.findUserByUsername(usernameTo);
-        User user2 = userRepository.findUserByUsername(usernameFrom);
-        if(user1 != null && user2 != null) {
-            user1.getFriends().remove(user2);
-            user2.getFriendsOf().remove(user1);
-        }
-        else {
-            throw new IllegalArgumentException("User or users not found");
-        }
-    }
 
 
     @Transactional
@@ -167,7 +132,7 @@ public class UserService {
         taskRepository.deleteAllByUser(user);
         repeatTaskRepository.deleteAllByUser(user);
         groupUsersRepository.deleteAllByUser(user);
-        userRepository.deleteContacts(user.getUserId());
+        contactRepository.deleteALlByFirstOrSecond(user,user);
         userRepository.delete(user);
     }
 

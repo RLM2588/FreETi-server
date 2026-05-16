@@ -1,26 +1,19 @@
 package ru.parovozik.backend.controllers;
 
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.parovozik.backend.dto.*;
 import ru.parovozik.backend.entity.*;
-import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Role;
 import ru.parovozik.backend.repostitory.GroupUsersRepository;
-import ru.parovozik.backend.service.AuthService;
-import jakarta.validation.Valid;
+import ru.parovozik.backend.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.parovozik.backend.service.GroupService;
-import ru.parovozik.backend.service.TaskService;
-import ru.parovozik.backend.service.UserService;
 
-import java.time.*;
-        import java.util.List;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,13 +24,16 @@ public class GroupController {
     private final UserService userService;
     private final GroupService groupService;
     private final GroupUsersRepository groupUsersRepository;
+    private final GroupEventService groupEventService;
 
-    public GroupController(AuthService authService, TaskService taskService, UserService userService, GroupService groupService, GroupUsersRepository groupUsersRepository) {
+
+    public GroupController(AuthService authService, TaskService taskService, UserService userService, GroupService groupService, GroupUsersRepository groupUsersRepository, GroupEventService groupEventService) {
         this.authService = authService;
         this.taskService = taskService;
         this.userService = userService;
         this.groupService = groupService;
         this.groupUsersRepository = groupUsersRepository;
+        this.groupEventService = groupEventService;
     }
 
     @GetMapping("/groups")
@@ -65,7 +61,7 @@ public class GroupController {
     }
 
     @PutMapping("/member_switch")
-    public ResponseEntity<GroupUserAnswer> memberSwitch(@Param("user_id") int userId, @Param("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<GroupUserAnswer> memberSwitch(@RequestParam("user_id") int userId, @RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
         Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
         if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return (ResponseEntity<GroupUserAnswer>) ResponseEntity.badRequest();
 
@@ -80,7 +76,7 @@ public class GroupController {
     }
 
     @PutMapping("/member_add")
-    public ResponseEntity<Boolean> memberAdd(@Param("user_id") int userId, @Param("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Boolean> memberAdd(@RequestParam("user_id") int userId, @RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
         Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
         if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
 
@@ -90,7 +86,7 @@ public class GroupController {
     }
 
     @PutMapping("/member_delete")
-    public ResponseEntity<Boolean> memberDelete(@Param("user_id") int userId, @Param("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Boolean> memberDelete(@RequestParam("user_id") int userId, @RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
         Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
         if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
 
@@ -103,8 +99,34 @@ public class GroupController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("/group_members")
+    public ResponseEntity<List<GroupUserAnswer>> getMembers(@RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            UUID groupUUID = UUID.fromString(groupId);
+            groupService.getRole(userDetails.getUsername(), groupUUID);
+
+            return ResponseEntity.ok(groupService.getUsersByGroup(groupUUID).stream().map(GroupsUsers::toGroupUserAnswer).toList());
+        }
+        catch (Exception e) {
+            return (ResponseEntity<List<GroupUserAnswer>>) ResponseEntity.badRequest();
+        }
+    }
+
+    @GetMapping("/group_users")
+    public ResponseEntity<List<UserAnswer>> getMembersAsUsers(@RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            UUID groupUUID = UUID.fromString(groupId);
+            groupService.getRole(userDetails.getUsername(), groupUUID);
+
+            return ResponseEntity.ok(groupService.getUsersByGroup(groupUUID).stream().map(groupsUsers -> groupsUsers.getUser().asUserAnswer()).toList());
+        }
+        catch (Exception e) {
+            return (ResponseEntity<List<UserAnswer>>) ResponseEntity.badRequest();
+        }
+    }
+
     @PutMapping("/leave")
-    public ResponseEntity<Boolean> leaveFromGroup(@Param("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Boolean> leaveFromGroup(@RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
         Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
         if (requestRole == Role.OWNER) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
 
@@ -113,7 +135,7 @@ public class GroupController {
     }
 
     @DeleteMapping("/delete_group")
-    public ResponseEntity<Boolean> deleteGroup(@Param("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Boolean> deleteGroup(@RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
         Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
         if (requestRole != Role.OWNER) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
 
@@ -121,7 +143,32 @@ public class GroupController {
         return ResponseEntity.ok(res);
     }
 
+    @PostMapping("/new_event")
+    public ResponseEntity<List<GroupTaskAnswer>> createNewGroupEvent(@RequestParam("group_id") String groupId, @RequestBody GroupEventRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserAsUser(userDetails.getUsername());
+        System.out.println(request.time_pick());
+        System.out.println(request.importance());
+        Role role = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
+        if (role != Role.OWNER && role != Role.ADMIN) return new ResponseEntity<List<GroupTaskAnswer>>(HttpStatusCode.valueOf(403));
 
+
+        List<GroupEventService.TimeInterval> intervals = groupEventService.findEventPeriods(groupId, user.getUserId(), request);
+
+        return ResponseEntity.ok(groupEventService.mapIntervalsToGroupTasks(intervals, request.time_pick(), groupId, user, request));
+    }
+
+
+    @DeleteMapping("/delete_event")
+    public ResponseEntity<Boolean> deleteEventTask(@RequestParam("event_id") String eventTaskUuid, @AuthenticationPrincipal UserDetails userDetails) {
+        Groups group = groupEventService.getGroupEvents(UUID.fromString(eventTaskUuid)).getGroup();
+
+        Role role = groupService.getRole(userDetails.getUsername(), group.getId());
+
+        if (role != Role.ADMIN && role != Role.OWNER) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
+
+        boolean res = groupEventService.deleteGroupTask(UUID.fromString(eventTaskUuid));
+        return ResponseEntity.ok(res);
+    }
 
 
 

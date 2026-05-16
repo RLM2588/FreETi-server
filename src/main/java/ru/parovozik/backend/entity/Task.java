@@ -3,10 +3,13 @@ package ru.parovozik.backend.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
+import ru.parovozik.backend.dto.TaskAnswer;
 import ru.parovozik.backend.model.Privacy;
 import ru.parovozik.backend.model.Status;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
@@ -101,5 +104,14 @@ public class Task extends TaskTemplate{
 
     public void setPushTemplate(PushTemplate pushTemplate) {
         this.pushTemplate = pushTemplate;
+    }
+
+    public static TaskAnswer toTaskAnswer(Task task) {
+        return new TaskAnswer(task.getClientUuid(), task.getTitle(), task.getBody(), task.getStatus(), task.getPrivacy(),
+                task.getColor(), toInstant(task.getStart()), toInstant(task.getEnd()), 1,task.getImportance(),toInstant(task.getCreatedAt()));
+    }
+
+    private static Instant toInstant(LocalDateTime start) {
+        return start.toInstant(ZoneOffset.UTC);
     }
 }

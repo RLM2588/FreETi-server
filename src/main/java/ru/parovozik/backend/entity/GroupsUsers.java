@@ -1,6 +1,7 @@
 package ru.parovozik.backend.entity;
 
 import jakarta.persistence.*;
+import ru.parovozik.backend.dto.GroupUserAnswer;
 import ru.parovozik.backend.model.Role;
 
 
@@ -66,4 +67,6 @@ public class GroupsUsers {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    public GroupUserAnswer toGroupUserAnswer() { return new GroupUserAnswer(group.getId().toString(), user.getUserId(), role); }
 }

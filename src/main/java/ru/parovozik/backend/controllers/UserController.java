@@ -12,6 +12,7 @@ import ru.parovozik.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.parovozik.backend.service.ContactService;
 import ru.parovozik.backend.service.TaskService;
 import ru.parovozik.backend.service.UserService;
 
@@ -26,11 +27,13 @@ public class UserController {
     private final AuthService authService;
     private final TaskService taskService;
     private final UserService userService;
+    private final ContactService contactService;
 
-    public UserController(AuthService authService, TaskService taskService, UserService userService) {
+    public UserController(AuthService authService, TaskService taskService, UserService userService, ContactService contactService) {
         this.authService = authService;
         this.taskService = taskService;
         this.userService = userService;
+        this.contactService = contactService;
     }
 
     @PutMapping("/id")
@@ -62,7 +65,7 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<List<UserAnswer>> getUserByPartUsername(@Param("login") String login) {
+    public ResponseEntity<List<UserAnswer>> getUserByPartUsername(@RequestParam("login") String login) {
         try {
             List<UserAnswer> userAnswer = userService.getUsersByPartUsername(login);
             if (userAnswer == null) return ResponseEntity.ok(List.of());
@@ -75,7 +78,7 @@ public class UserController {
     }
 
     @GetMapping("/byIds")
-    public ResponseEntity<List<UserAnswer>> getUsersByIds(@Param("ids") String ids) {
+    public ResponseEntity<List<UserAnswer>> getUsersByIds(@RequestParam("ids") String ids) {
         return ResponseEntity.ok(
                 Arrays.stream(ids.split(","))
                         .map(id -> userService.getUserById(Integer.parseInt(id)))
@@ -83,6 +86,27 @@ public class UserController {
                         .toList());
     }
 
+    @GetMapping("/contacts")
+    public ResponseEntity<List<ContactAnswer>> getContacts(@AuthenticationPrincipal UserDetails userDetails) {
+//        User user = userService.getUserAsUser();
 
+        return ResponseEntity.ok(contactService.getContactAndFriends(userDetails.getUsername()));
+    }
 
+    @PutMapping("/add_contact")
+    public ResponseEntity<ContactAnswer> updateContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
+        int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
+
+        if (request.user1() != userId || request.user2() == userId) return (ResponseEntity<ContactAnswer>) ResponseEntity.badRequest();
+
+        return ResponseEntity.ok(contactService.updateContact(request));
+    }
+
+    @DeleteMapping("/delete_contact")
+    public ResponseEntity<Boolean> deleteContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
+        int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
+
+        if (request.user1() != userId || request.user2() == userId) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
+        return ResponseEntity.ok(contactService.deleteContact(request));
+    }
 }
