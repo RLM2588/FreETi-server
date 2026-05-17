@@ -43,7 +43,6 @@ public class GroupEventService {
             User user = userRepository.findUserByUsername(taskRequest.username());
             task.setTitle(taskRequest.title());
             task.setBody(taskRequest.body());
-            task.setPushTemplate(taskRequest.pushTemplate());
             task.setColor(taskRequest.color());
             task.setPrivacy(taskRequest.privacy());
             task.setStatus(taskRequest.status());
@@ -352,7 +351,7 @@ public class GroupEventService {
                             request.colour(),
                             taskService.toLocalDateTime(taskStart),
                             taskService.toLocalDateTime(taskEnd),
-                            pushTemplateRepository.findPushTemplateByPushId(1),
+                            1,
                             UUID.fromString(groupId)
                     ));
 

@@ -170,8 +170,19 @@ public class GroupController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("/group_tasks")
+    public ResponseEntity<List<GroupTaskAnswer>> getGroupTasks(@RequestParam("yearMonth") String yearMonthDay, @RequestParam("id") String id, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserAsUser(userDetails.getUsername());
+        UUID uuid = UUID.fromString(id);
+
+        Role role = groupService.getRole(userDetails.getUsername(), uuid);
+        if (role != null) return (ResponseEntity<List<GroupTaskAnswer>>) ResponseEntity.badRequest(null);
+
+        List<GroupEvents> tasks = groupEventService.getGroupEvents(uuid);
 
 
+
+    }
 
 
 
