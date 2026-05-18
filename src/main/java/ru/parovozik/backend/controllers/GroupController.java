@@ -176,14 +176,10 @@ public class GroupController {
         UUID uuid = UUID.fromString(id);
 
         Role role = groupService.getRole(userDetails.getUsername(), uuid);
-        if (role != null) return (ResponseEntity<List<GroupTaskAnswer>>) ResponseEntity.badRequest(null);
+        //if (role != null) return (ResponseEntity<List<GroupTaskAnswer>>) ResponseEntity.badRequest(null);
 
-        List<GroupEvents> tasks = groupEventService.getGroupEvents(uuid);
+        List<GroupTaskAnswer> tasks = groupEventService.getTasksByStartAndEnd(uuid, yearMonthDay);
 
-
-
+        return ResponseEntity.ok(tasks);
     }
-
-
-
 }

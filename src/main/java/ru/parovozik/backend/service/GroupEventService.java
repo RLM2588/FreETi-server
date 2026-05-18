@@ -86,6 +86,36 @@ public class GroupEventService {
         return groupEventsRepository.findById(uuid).get();
     }
 
+    public List<GroupTaskAnswer> getTasksByStartAndEnd(UUID uuid, String yearMonthEntry) {
+        Groups group = groupsRepository.getById(uuid);
+
+        int lastIndex = yearMonthEntry.lastIndexOf('-');
+        String ym = yearMonthEntry.substring(0, lastIndex);
+        int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
+
+        LocalDateTime startOfMonth;
+        LocalDateTime endOfMonth;
+
+        YearMonth yearMonth = YearMonth.parse(ym);
+        if (day == 1) {
+            endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
+            yearMonth.minusMonths(1);
+            startOfMonth = yearMonth.atEndOfMonth().atStartOfDay();
+        }
+        else if (!yearMonth.isValidDay(day + 1)) {
+            startOfMonth = yearMonth.atDay(day - 1).atStartOfDay();
+            yearMonth.plusMonths(1);
+            endOfMonth = yearMonth.atDay(1).atTime(LocalTime.MAX);
+        }
+        else {
+            startOfMonth = yearMonth.atDay(1).atStartOfDay();
+            endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+        }
+
+        List<GroupEvents> events = groupEventsRepository.findAllByGroupAndEndingBetween(group, startOfMonth, endOfMonth);
+        return events.stream().map(GroupEvents::toGroupTaskAnswer).toList();
+    }
+
     public boolean updateTitle(UUID uuid, String newTitle) {
         try {
             GroupEvents task = groupEventsRepository.findById(uuid).get();
