@@ -1,6 +1,8 @@
 package ru.parovozik.backend.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.util.UUID;
 
@@ -16,6 +18,8 @@ public class Contact {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "uuid", updatable = false, nullable = false)
     private UUID uuid;
 
     @ManyToOne

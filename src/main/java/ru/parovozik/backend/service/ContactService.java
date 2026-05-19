@@ -25,9 +25,11 @@ public class ContactService {
     public boolean addContact(ContactAnswer request) {
         try {
             Contact contact = new Contact(userRepository.findUserByUserId(request.user1()),userRepository.findUserByUserId(request.user2()),request.isFriend());
+            contactRepository.save(contact);
             return true;
         }
         catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new RuntimeException("The programm had problem with adding the contact");
         }
     }
@@ -53,15 +55,22 @@ public class ContactService {
                     userRepository.findUserByUserId(request.user1()),
                     userRepository.findUserByUserId(request.user2())
             ) != null) {
-                this.addContact(request);
+                contactRepository.updateIsFriend(userRepository.findUserByUserId(request.user1()),
+                        userRepository.findUserByUserId(request.user2()), !request.isFriend());
+                System.out.println(request.user1());
+                System.out.println(request.user2());
+                System.out.println(request.isFriend());
                 return request;
             }
+            else {
+                this.addContact(request);
+            }
 
-            contactRepository.updateIsFriend(userRepository.findUserByUserId(request.user1()),
-                    userRepository.findUserByUserId(request.user2()), !request.isFriend());
-            return new ContactAnswer(request.user1(), request.user2(), !request.isFriend());
+
+            return new ContactAnswer(request.user1(), request.user2(), request.isFriend());
         } catch (Exception e) {
-            throw new RuntimeException("The programm had problem with updating the contact");
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 

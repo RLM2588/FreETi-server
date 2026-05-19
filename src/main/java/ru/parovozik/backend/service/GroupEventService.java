@@ -46,6 +46,8 @@ public class GroupEventService {
             task.setColor(taskRequest.color());
             task.setPrivacy(taskRequest.privacy());
             task.setStatus(taskRequest.status());
+            task.setStart(taskRequest.starting());
+            task.setEnding(taskRequest.ending());
             task.setGroup(groupsRepository.getById(taskRequest.group()));
             if(user!=null) {
                 task.setCreateByUser(user);
@@ -112,7 +114,14 @@ public class GroupEventService {
             endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
         }
 
+        startOfMonth = yearMonth.atDay(day).atStartOfDay();
+        endOfMonth = yearMonth.atDay(day).atTime(LocalTime.MAX);
+
         List<GroupEvents> events = groupEventsRepository.findAllByGroupAndEndingBetween(group, startOfMonth, endOfMonth);
+        //events = groupEventsRepository.findAllByGroup(group);
+
+
+
         return events.stream().map(GroupEvents::toGroupTaskAnswer).toList();
     }
 
@@ -255,7 +264,7 @@ public class GroupEventService {
         Arrays.fill(days, mask);
 
         for (GroupsUsers user : users)
-            taskService.returnTasksByMonth(user.getUser(), List.of(Privacy.FRIENDS, Privacy.PRIVATE, Privacy.PUBLIC), LocalDateTime start, LocalDateTime end);
+            taskService.returnTasksByMonth(user.getUser(), List.of(Privacy.FRIENDS, Privacy.PRIVATE, Privacy.PUBLIC), LocalDateTime start, LocalDateTime time_end);
 
 
 
@@ -277,6 +286,7 @@ public class GroupEventService {
         // Глобальные рамки всего поиска
         Instant globalStart = startDate.atStartOfDay(zone).toInstant();
         Instant globalEnd = endDate.atTime(LocalTime.MAX).atZone(zone).toInstant();
+
 
         // Защита от слишком большого диапазона дат (аналог вашей проверки)
         if (Period.between(startDate, endDate).getDays() > 100) {
@@ -360,6 +370,11 @@ public class GroupEventService {
             }
         }
 
+        for (TimeInterval timeInterval : freeIntervals) {
+            System.out.println(timeInterval.start);
+            System.out.println(timeInterval.end);
+        }
+
         // 7. Маппинг и возврат результата
         // Здесь вы можете превратить List<TimeInterval> в ваш List<GroupTaskAnswer>, если это необходимо
         return freeIntervals;
@@ -371,16 +386,22 @@ public class GroupEventService {
                                                           User createdBy,  GroupEventRequest request) {
         return freeIntervals.stream()
                 .map(interval -> {
-                    Instant taskStart = interval.start();
+                    Instant taskStart = interval.start;
                     Instant taskEnd = taskStart.plusMillis(timePickMillis);
+                    System.out.println("ab");
+                    System.out.println(taskStart);
+                    System.out.println(interval.start());
+                    System.out.println(interval.start);
+                    System.out.println(taskService.toLocalDateTime(interval.start));
+                    System.out.println("ab/");
                     UUID uuid = createGroupTask(new GroupTaskRequest(request.title(),
                             request.body(),
                             createdBy.getUsername(),
                             Status.ACTIVE,
                             Privacy.PUBLIC,
                             request.colour(),
-                            taskService.toLocalDateTime(taskStart),
-                            taskService.toLocalDateTime(taskEnd),
+                            toLocalDateTime(taskStart),
+                            toLocalDateTime(taskEnd),
                             1,
                             UUID.fromString(groupId)
                     ));
@@ -402,6 +423,11 @@ public class GroupEventService {
                 .collect(Collectors.toList());
     }
 
+    public LocalDateTime toLocalDateTime(Instant start) {
+        long epochSec = start.getEpochSecond();
+        //return Instant.ofEpochMilli(epochSec).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return LocalDateTime.ofInstant(start, ZoneId.systemDefault());
+    }
     public record TimeInterval(Instant start, Instant end) {
         public long getDurationMillis() {
             return end.toEpochMilli() - start.toEpochMilli();

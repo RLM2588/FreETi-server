@@ -9,7 +9,6 @@ import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
 import ru.parovozik.backend.model.Privacy;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -24,10 +23,13 @@ public interface TaskRepository extends CrudRepository<Task, UUID> {
     Optional<Task> findByClientUuidAndUser(UUID client_uuid, User user);
 
     // TODO нужно бы искать по тому, находится ли начало в данном промежутке
-    List<Task> findByUserAndEndingBetweenAndRepeatTaskIsNull(User user, LocalDateTime start, LocalDateTime end);
+    List<Task> findByUserAndStartBetweenAndRepeatTaskIsNull(User user, LocalDateTime start, LocalDateTime end);
     List<Task> findAllByUserAndRepeatTask(User user, RepeatTask repeatTask);
 
     List<Task> findByUserAndEndingBetweenAndRepeatTaskIn(User user, LocalDateTime endingAfter, LocalDateTime endingBefore, Collection<RepeatTask> repeatTasks);
+
+
+    Optional<Task> findByClientUuid(UUID clientUuid);
 
     @Query("SELECT t FROM Task t " +
             "WHERE t.user.userId IN :userIds " +

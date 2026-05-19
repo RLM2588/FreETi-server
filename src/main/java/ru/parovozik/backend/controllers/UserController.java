@@ -40,7 +40,7 @@ public class UserController {
     public ResponseEntity<UserAnswer> updateUser(@RequestBody UserRequest userRequest,
                                                  @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        if (!Objects.equals(userRequest.login(), username)) return (ResponseEntity<UserAnswer>) ResponseEntity.badRequest();
+        if (!Objects.equals(userRequest.login(), username)) return ResponseEntity.badRequest().build();
         userService.updateAvatar(username, userRequest.avatar());
         userService.changeName(username, userRequest.username());
         return ResponseEntity.ok(userService.getUser(username));
@@ -60,7 +60,7 @@ public class UserController {
             return ResponseEntity.ok(userAnswer);
         }
         catch (Exception ex) {
-            return (ResponseEntity<List<UserAnswer>>) ResponseEntity.notFound();
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -73,7 +73,7 @@ public class UserController {
             return ResponseEntity.ok(userAnswer);
         }
         catch (Exception ex) {
-            return (ResponseEntity<List<UserAnswer>>) ResponseEntity.notFound();
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -97,7 +97,7 @@ public class UserController {
     public ResponseEntity<ContactAnswer> updateContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
         int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
 
-        if (request.user1() != userId || request.user2() == userId) return (ResponseEntity<ContactAnswer>) ResponseEntity.badRequest();
+        if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
 
         return ResponseEntity.ok(contactService.updateContact(request));
     }
@@ -106,7 +106,7 @@ public class UserController {
     public ResponseEntity<Boolean> deleteContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
         int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
 
-        if (request.user1() != userId || request.user2() == userId) return (ResponseEntity<Boolean>) ResponseEntity.badRequest();
+        if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(contactService.deleteContact(request));
     }
 }
