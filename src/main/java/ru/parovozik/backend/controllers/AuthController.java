@@ -18,12 +18,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register/test")
-    public ResponseEntity<?> testRegister(@RequestBody RegisterRequest request) {
-        // В текущем RegisterRequest уже есть username и email
-        authService.sendVerificationCode(request.getUsername(), request.getEmail());
-        return ResponseEntity.ok("Code sent to " + request.getEmail());
-    }
+
 
 
 
