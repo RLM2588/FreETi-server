@@ -75,10 +75,10 @@ public class AuthService {
 
     @Transactional
     public TokenResponse completeRegistration(FinalRegisterRequest request) {
-        /*String validCode = verificationCodes.get(request.getEmail());
+        String validCode = verificationCodes.get(request.getEmail());
         if (validCode == null || !validCode.equals(request.getCode())) {
             throw new RuntimeException("Invalid or expired verification code");
-        }*/
+        }
 
         User user = new User();
         user.setUsername(request.getLogin());
