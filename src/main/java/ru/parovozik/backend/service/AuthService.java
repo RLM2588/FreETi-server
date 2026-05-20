@@ -4,8 +4,6 @@ import ru.parovozik.backend.dto.*;
 import ru.parovozik.backend.entity.*;
 import ru.parovozik.backend.repostitory.*;
 import ru.parovozik.backend.authentication.JwtTokenProvider;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +18,67 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationCodeService verificationCodeService;
+    private final EmailService emailService;
 
     public AuthService(UserRepository userRepository,
                        RefreshTokenRepository refreshTokenRepository,
                        JwtTokenProvider jwtTokenProvider,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder, VerificationCodeService verificationCodeService, EmailService emailService) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
+        this.verificationCodeService = verificationCodeService;
+        this.emailService = emailService;
+    }
+
+    @Transactional
+    public void initiateRegistration(RegisterRequest request) {
+        // Проверка существования пользователя
+        if (userRepository.findUserByUsername(request.getUsername()) != null) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        if (userRepository.findByEmail(request.getEmail()) != null) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        // Генерация кода
+        String code = verificationCodeService.generateCode(request.getEmail());
+
+        // Отправка кода на email
+        emailService.sendVerificationCode(request.getEmail(), code, request.getUsername());
+    }
+
+    @Transactional
+    public void sendVerificationCode(String username, String email) {
+        if (userRepository.findUserByUsername(username) != null) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        String code = verificationCodeService.generateCode(email);
+        emailService.sendVerificationCode(email, code, username);
+    }
+
+    @Transactional
+    public TokenResponse completeRegistration(FinalRegisterRequest request) {
+        // Проверка кода
+        if (!verificationCodeService.validateCode(request.getEmail(), request.getCode())) {
+            throw new RuntimeException("Invalid or expired verification code");
+        }
+
+        // Создание пользователя
+        User user = new User();
+        user.setUsername(request.getLogin());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+
+        // Удаление использованного кода
+        verificationCodeService.removeCode(request.getEmail());
+
+        return generateTokens(user);
     }
 
     @Transactional
@@ -47,7 +97,7 @@ public class AuthService {
     }
 
 
-    @Transactional
+    /*@Transactional
     public void initiateRegistration(RegisterRequest request) {
         if (userRepository.findUserByUsername(request.getUsername()) != null) {
             throw new RuntimeException("Username already exists");
@@ -88,7 +138,7 @@ public class AuthService {
 
         verificationCodes.remove(request.getEmail());
         return generateTokens(user);
-    }
+    }*/
 
     @Transactional
     public TokenResponse login(LoginRequest request) {
