@@ -24,12 +24,17 @@ public class AuthController {
 
     @PostMapping("/final_register")
     public ResponseEntity<?> finalRegister(@Valid @RequestBody FinalRegisterRequest request) {
+        try {
         TokenResponse tokens = authService.completeRegistration(request);
         return ResponseEntity.ok(tokens);
+        }
+        catch (Exception e) {
+            System.out.println("final register error");
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 
-    // Соответствует методу register(username, email) в Android
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         authService.initiateRegistration(request);
