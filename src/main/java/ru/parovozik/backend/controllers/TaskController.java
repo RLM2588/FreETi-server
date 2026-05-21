@@ -49,64 +49,91 @@ public class TaskController {
 
     @GetMapping("/othertasks")
     public ResponseEntity<List<OtherTaskAnswer>> getOtherUserTasks(@RequestParam("yearMonth") String yearMonth, @RequestParam("login") String login, @AuthenticationPrincipal UserDetails userDetails) {
-        User userReq = userService.getUserAsUser(userDetails.getUsername());
-        User secondUser = userService.getUserAsUser(login);
-        Contact contact = contactRepository.findAllByFirstAndSecond(userReq, secondUser);
-        if (contact == null) return ResponseEntity.badRequest().build();
+        try {
 
-        if (contact.isFriend())
-            return ResponseEntity.ok(taskService.returnFriendTasks(login, yearMonth));
+            User userReq = userService.getUserAsUser(userDetails.getUsername());
+            User secondUser = userService.getUserAsUser(login);
+            Contact contact = contactRepository.findAllByFirstAndSecond(userReq, secondUser);
+            if (contact == null) return ResponseEntity.badRequest().build();
 
-        return ResponseEntity.ok(taskService.returnOrdinalTasks(login, yearMonth));
+            if (contact.isFriend())
+                return ResponseEntity.ok(taskService.returnFriendTasks(login, yearMonth));
+
+            return ResponseEntity.ok(taskService.returnOrdinalTasks(login, yearMonth));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/username_id")
     public ResponseEntity<UsernameIdAnswer> getusernameId(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(new UsernameIdAnswer(userDetails.getUsername(), userService.getUserAsUser(userDetails.getUsername()).getUserId()));
+        try {
+            return ResponseEntity.ok(new UsernameIdAnswer(userDetails.getUsername(), userService.getUserAsUser(userDetails.getUsername()).getUserId()));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskAnswer>> getTasks(@RequestParam(name = "yearMonth") String yearMonthEntry, @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        User user = userService.getUserAsUser(username);
-        YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
-        LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
+        try {
+            String username = userDetails.getUsername();
+            User user = userService.getUserAsUser(username);
+            YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
+            LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
 
-        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+            LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
 
 
-        //return ResponseEntity.ok(taskService.returnAllTasks(userDetails.getUsername()));
+            //return ResponseEntity.ok(taskService.returnAllTasks(userDetails.getUsername()));
 
-        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
+            return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/tasks/update")
     public ResponseEntity<List<TaskAnswer>> getUpdatedTasks(@RequestParam(name = "yearMonth") String yearMonthEntry,
                                                             @RequestParam(name = "since") Long since, @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        User user = userService.getUserAsUser(username);
-        YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
-        LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
+        try {
+            String username = userDetails.getUsername();
+            User user = userService.getUserAsUser(username);
+            YearMonth yearMonth = YearMonth.parse(yearMonthEntry);
+            LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
 
-        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+            LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
 
-        //return ResponseEntity.ok(taskService.returnAllTasks(userDetails.getUsername()));
-        return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
+            //return ResponseEntity.ok(taskService.returnAllTasks(userDetails.getUsername()));
+            return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/unassigned")
     public ResponseEntity<List<TaskAnswer>> getUnassigned(@AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        User user = userService.getUserAsUser(username);
-        List<TaskAnswer> answers = taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), toLocalDateTime(Instant.ofEpochMilli(0)), toLocalDateTime(Instant.ofEpochMilli(0)));
+        try {
+            String username = userDetails.getUsername();
+            User user = userService.getUserAsUser(username);
+            List<TaskAnswer> answers = taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), toLocalDateTime(Instant.ofEpochMilli(0)), toLocalDateTime(Instant.ofEpochMilli(0)));
 
-        return ResponseEntity.ok(answers);
+            return ResponseEntity.ok(answers);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PatchMapping("tasks")
     public ResponseEntity<TaskAnswer> updateTask(@RequestBody TaskAnswer incomingTask, @AuthenticationPrincipal UserDetails userDetails) {
-        Task updatedTask;
-        updatedTask = taskService.updateTask(incomingTask, userDetails.getUsername());
+        try {
+            Task updatedTask;
+            updatedTask = taskService.updateTask(incomingTask, userDetails.getUsername());
 
         /*if (taskRepository.findById(incomingTask.id()).isPresent()) {
             updatedTask = taskService.updateTask(incomingTask, userDetails.getUsername());
@@ -117,14 +144,21 @@ public class TaskController {
             Optional<Task> res2 = taskRepository.findById(incomingTask.id());
             return res2.map(task -> ResponseEntity.ok(Task.toTaskAnswer(task))).orElseGet(() -> ResponseEntity.badRequest().build());
         }*/
-        return ResponseEntity.ok(taskService.toTaskAnswer(updatedTask));
+            return ResponseEntity.ok(taskService.toTaskAnswer(updatedTask));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/tasks")
-    public TaskAnswer addTask(@RequestBody TaskRequest newTask, @AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println(userDetails.getUsername());
-        //taskService.createTask(newTask, userDetails.getUsername());
-        return taskService.getTask(newTask.title(), userDetails.getUsername(), toLocalDateTime(newTask.start()), toLocalDateTime(newTask.time_end()));
+    public ResponseEntity<TaskAnswer> addTask(@RequestBody TaskRequest newTask, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            return ResponseEntity.ok(taskService.getTask(newTask.title(), userDetails.getUsername(), toLocalDateTime(newTask.start()), toLocalDateTime(newTask.time_end())));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     private LocalDateTime toLocalDateTime(Instant start) {

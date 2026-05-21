@@ -41,65 +41,97 @@ public class GroupController {
 
     @GetMapping("/groups")
     public ResponseEntity<List<GroupAnswer>> getGroupsByLogin(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(groupService.getUserGroupsAsAnswer(userDetails.getUsername()));
+        try {
+            return ResponseEntity.ok(groupService.getUserGroupsAsAnswer(userDetails.getUsername()));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/groups")
     public ResponseEntity<GroupAnswer> createGroup(@RequestBody GroupAnswer groupRequest, @AuthenticationPrincipal UserDetails userDetails) {
-        UUID newId = groupService.createGroup(groupRequest.title(), groupRequest.body());
-        groupService.addUser(userDetails.getUsername(), newId, Role.OWNER);
-        return ResponseEntity.ok(new GroupAnswer(newId, groupRequest.title(), groupRequest.body(), false));
+        try {
+            UUID newId = groupService.createGroup(groupRequest.title(), groupRequest.body());
+
+            groupService.addUser(userDetails.getUsername(), newId, Role.OWNER);
+            return ResponseEntity.ok(new GroupAnswer(newId, groupRequest.title(), groupRequest.body(), false));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/groups")
     public ResponseEntity<GroupAnswer> updateGroup(@RequestBody GroupAnswer groupRequest, @AuthenticationPrincipal UserDetails userDetails) {
-        Groups group = groupService.getGroupInfo(groupRequest.id());
-        User user = userService.getUserAsUser(userDetails.getUsername());
-        GroupsUsers groupsUsers = groupUsersRepository.findByUserAndGroup(user, group);
-        if (groupsUsers.getRole() == Role.OWNER) {
-            groupService.updateBody(group.getId(), groupRequest.body());
-            groupService.updateTitle(group.getId(), groupRequest.title());
+        try {
+            Groups group = groupService.getGroupInfo(groupRequest.id());
+            User user = userService.getUserAsUser(userDetails.getUsername());
+            GroupsUsers groupsUsers = groupUsersRepository.findByUserAndGroup(user, group);
+            if (groupsUsers.getRole() == Role.OWNER) {
+                groupService.updateBody(group.getId(), groupRequest.body());
+                groupService.updateTitle(group.getId(), groupRequest.title());
+            }
+            return ResponseEntity.ok(groupService.getGroupInfo(groupRequest.id()).toGroupAnswer());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(groupService.getGroupInfo(groupRequest.id()).toGroupAnswer());
     }
 
     @PutMapping("/member_switch")
     public ResponseEntity<GroupUserAnswer> memberSwitch(@RequestParam("user_id") int userId, @RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
-        Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
-        if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return ResponseEntity.badRequest().build();
+        try {
+            Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
 
-        String userLogin = userService.getUserById(userId).login();
-        Role userRole = groupService.getRole(userLogin, UUID.fromString(groupId));
-        if (userRole == Role.OWNER) return ResponseEntity.badRequest().build();
+            if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return ResponseEntity.badRequest().build();
 
-        boolean res = groupService.updateRole(userLogin, UUID.fromString(groupId), userRole == Role.MEMBER ? Role.ADMIN : Role.MEMBER);
+            String userLogin = userService.getUserById(userId).login();
+            Role userRole = groupService.getRole(userLogin, UUID.fromString(groupId));
+            if (userRole == Role.OWNER) return ResponseEntity.badRequest().build();
 
-        if (!res) return ResponseEntity.badRequest().build();
-        return ResponseEntity.ok(new GroupUserAnswer(groupId, userId, userRole == Role.MEMBER ? Role.ADMIN : Role.MEMBER));
+            boolean res = groupService.updateRole(userLogin, UUID.fromString(groupId), userRole == Role.MEMBER ? Role.ADMIN : Role.MEMBER);
+
+            if (!res) return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok(new GroupUserAnswer(groupId, userId, userRole == Role.MEMBER ? Role.ADMIN : Role.MEMBER));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/member_add")
     public ResponseEntity<Boolean> memberAdd(@RequestParam("user_id") int userId, @RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
-        Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
-        if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return ResponseEntity.badRequest().build();
+        try {
+            Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
+            if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return ResponseEntity.badRequest().build();
 
-        String userLogin = userService.getUserById(userId).login();
-        boolean res = groupService.addUser(userLogin, UUID.fromString(groupId), Role.MEMBER);
-        return ResponseEntity.ok(res);
+            String userLogin = userService.getUserById(userId).login();
+            boolean res = groupService.addUser(userLogin, UUID.fromString(groupId), Role.MEMBER);
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/member_delete")
     public ResponseEntity<Boolean> memberDelete(@RequestParam("user_id") int userId, @RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
-        Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
-        if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return ResponseEntity.badRequest().build();
+        try {
+            Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
+            if (requestRole != Role.OWNER && requestRole != Role.ADMIN) return ResponseEntity.badRequest().build();
 
 
-        String userLogin = userService.getUserById(userId).login();
-        Role userRole = groupService.getRole(userLogin, UUID.fromString(groupId));
-        if (userRole == Role.OWNER) return ResponseEntity.badRequest().build();
+            String userLogin = userService.getUserById(userId).login();
+            Role userRole = groupService.getRole(userLogin, UUID.fromString(groupId));
+            if (userRole == Role.OWNER) return ResponseEntity.badRequest().build();
 
-        boolean res = groupService.deleteUser(userLogin, UUID.fromString(groupId));
-        return ResponseEntity.ok(res);
+            boolean res = groupService.deleteUser(userLogin, UUID.fromString(groupId));
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/group_members")
@@ -109,12 +141,10 @@ public class GroupController {
             groupService.getRole(userDetails.getUsername(), groupUUID);
 
             return ResponseEntity.ok(groupService.getUsersByGroup(groupUUID).stream().map(GroupsUsers::toGroupUserAnswer).toList());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
-
 
 
     @GetMapping("/group_users")
@@ -125,8 +155,7 @@ public class GroupController {
             if (role == null) return ResponseEntity.badRequest().build();
 
             return ResponseEntity.ok(groupService.getUsersByGroup(groupUUID).stream().map(groupsUsers -> groupsUsers.getUser().asUserAnswer()).toList());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -139,67 +168,94 @@ public class GroupController {
             if (role == null) return ResponseEntity.badRequest().build();
 
             return ResponseEntity.ok(groupService.getUsersByGroup(groupUUID).size());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/leave")
     public ResponseEntity<Boolean> leaveFromGroup(@RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
-        Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
-        if (requestRole == Role.OWNER) return ResponseEntity.badRequest().build();
+        try {
+            Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
+            if (requestRole == Role.OWNER) return ResponseEntity.badRequest().build();
 
-        boolean res = groupService.deleteUser(userDetails.getUsername(), UUID.fromString(groupId));
-        return ResponseEntity.ok(res);
+            boolean res = groupService.deleteUser(userDetails.getUsername(), UUID.fromString(groupId));
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/delete_group")
     public ResponseEntity<Boolean> deleteGroup(@RequestParam("group_id") String groupId, @AuthenticationPrincipal UserDetails userDetails) {
-        Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
-        if (requestRole != Role.OWNER) return ResponseEntity.badRequest().build();
+        try {
+            Role requestRole = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
+            if (requestRole != Role.OWNER) return ResponseEntity.badRequest().build();
 
-        boolean res = groupService.deleteGroup(UUID.fromString(groupId));
-        return ResponseEntity.ok(res);
+            boolean res = groupService.deleteGroup(UUID.fromString(groupId));
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/new_event")
     public ResponseEntity<List<GroupTaskAnswer>> createNewGroupEvent(@RequestParam("group_id") String groupId, @RequestBody GroupEventRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserAsUser(userDetails.getUsername());
-        System.out.println(request.time_pick());
-        System.out.println(request.importance());
-        Role role = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
-        if (role != Role.OWNER && role != Role.ADMIN) return new ResponseEntity<List<GroupTaskAnswer>>(HttpStatusCode.valueOf(403));
+        try {
+            User user = userService.getUserAsUser(userDetails.getUsername());
+            System.out.println(request.time_pick());
+            System.out.println(request.importance());
+            Role role = groupService.getRole(userDetails.getUsername(), UUID.fromString(groupId));
+            if (role != Role.OWNER && role != Role.ADMIN)
+                return new ResponseEntity<List<GroupTaskAnswer>>(HttpStatusCode.valueOf(403));
 
 
-        List<GroupEventService.TimeInterval> intervals = groupEventService.findEventPeriods(groupId, user.getUserId(), request);
+            List<GroupEventService.TimeInterval> intervals = groupEventService.findEventPeriods(groupId, user.getUserId(), request);
 
-        return ResponseEntity.ok(groupEventService.mapIntervalsToGroupTasks(intervals, request.time_pick(), groupId, user, request));
+            return ResponseEntity.ok(groupEventService.mapIntervalsToGroupTasks(intervals, request.time_pick(), groupId, user, request));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 
     @DeleteMapping("/delete_event")
     public ResponseEntity<Boolean> deleteEventTask(@RequestParam("event_id") String eventTaskUuid, @AuthenticationPrincipal UserDetails userDetails) {
-        Groups group = groupEventService.getGroupEvents(UUID.fromString(eventTaskUuid)).getGroup();
+        try {
+            Groups group = groupEventService.getGroupEvents(UUID.fromString(eventTaskUuid)).getGroup();
 
-        Role role = groupService.getRole(userDetails.getUsername(), group.getId());
+            Role role = groupService.getRole(userDetails.getUsername(), group.getId());
 
-        if (role != Role.ADMIN && role != Role.OWNER) return ResponseEntity.badRequest().build();
+            if (role != Role.ADMIN && role != Role.OWNER) return ResponseEntity.badRequest().build();
 
-        boolean res = groupEventService.deleteGroupTask(UUID.fromString(eventTaskUuid));
-        return ResponseEntity.ok(res);
+            boolean res = groupEventService.deleteGroupTask(UUID.fromString(eventTaskUuid));
+            return ResponseEntity.ok(res);
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/group_tasks")
     public ResponseEntity<List<GroupTaskAnswer>> getGroupTasks(@RequestParam("yearMonth") String yearMonthDay, @RequestParam("id") String id, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserAsUser(userDetails.getUsername());
-        UUID uuid = UUID.fromString(id);
+        try {
+            User user = userService.getUserAsUser(userDetails.getUsername());
+            UUID uuid = UUID.fromString(id);
 
-        Role role = groupService.getRole(userDetails.getUsername(), uuid);
-        //if (role != null) return (ResponseEntity<List<GroupTaskAnswer>>) ResponseEntity.badRequest(null);
+            Role role = groupService.getRole(userDetails.getUsername(), uuid);
+            //if (role != null) return (ResponseEntity<List<GroupTaskAnswer>>) ResponseEntity.badRequest(null);
 
-        List<GroupTaskAnswer> tasks = groupEventService.getTasksByStartAndEnd(uuid, yearMonthDay);
-        //tasks = groupEventsRepository.findAllByGroup(groupService.getGroupInfo(uuid)).stream().map(GroupEvents::toGroupTaskAnswer).toList();
-        return ResponseEntity.ok(tasks);
+            List<GroupTaskAnswer> tasks = groupEventService.getTasksByStartAndEnd(uuid, yearMonthDay);
+            //tasks = groupEventsRepository.findAllByGroup(groupService.getGroupInfo(uuid)).stream().map(GroupEvents::toGroupTaskAnswer).toList();
+            return ResponseEntity.ok(tasks);
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

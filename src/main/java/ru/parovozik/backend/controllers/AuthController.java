@@ -1,5 +1,6 @@
 package ru.parovozik.backend.controllers;
 
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.parovozik.backend.dto.*;
@@ -19,16 +20,12 @@ public class AuthController {
     }
 
 
-
-
-
     @PostMapping("/final_register")
     public ResponseEntity<?> finalRegister(@Valid @RequestBody FinalRegisterRequest request) {
         try {
-        TokenResponse tokens = authService.completeRegistration(request);
-        return ResponseEntity.ok(tokens);
-        }
-        catch (Exception e) {
+            TokenResponse tokens = authService.completeRegistration(request);
+            return ResponseEntity.ok(tokens);
+        } catch (Exception e) {
             System.out.println("final register error");
             return ResponseEntity.badRequest().build();
         }
@@ -37,28 +34,48 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        authService.initiateRegistration(request);
-        return ResponseEntity.ok("Verification code sent");
+        try {
+            authService.initiateRegistration(request);
+            return ResponseEntity.ok("Verification code sent");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
-
 
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        TokenResponse tokens = authService.login(request);
-        return ResponseEntity.ok(tokens);
+        try {
+            TokenResponse tokens = authService.login(request);
+            return ResponseEntity.ok(tokens);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest request) {
-        TokenResponse tokens = authService.refresh(request.getRefreshToken());
-        return ResponseEntity.ok(tokens);
+        try {
+            TokenResponse tokens = authService.refresh(request.getRefreshToken());
+            return ResponseEntity.ok(tokens);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.status(HttpStatusCode.valueOf(401)).build();
+        }
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
-        authService.logout(request.getRefreshToken());
-        return ResponseEntity.ok("Logged out");
+        try {
+            authService.logout(request.getRefreshToken());
+            return ResponseEntity.ok("Logged out");
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

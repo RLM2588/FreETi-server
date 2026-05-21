@@ -39,16 +39,26 @@ public class UserController {
     @PutMapping("/id")
     public ResponseEntity<UserAnswer> updateUser(@RequestBody UserRequest userRequest,
                                                  @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        if (!Objects.equals(userRequest.login(), username)) return ResponseEntity.badRequest().build();
-        userService.updateAvatar(username, userRequest.avatar());
-        userService.changeName(username, userRequest.username());
-        return ResponseEntity.ok(userService.getUser(username));
+        try {
+            String username = userDetails.getUsername();
+            if (!Objects.equals(userRequest.login(), username)) return ResponseEntity.badRequest().build();
+            userService.updateAvatar(username, userRequest.avatar());
+            userService.changeName(username, userRequest.username());
+            return ResponseEntity.ok(userService.getUser(username));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/user")
     public ResponseEntity<UserAnswer> getMe(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userService.getUser(userDetails.getUsername()));
+        try {
+            return ResponseEntity.ok(userService.getUser(userDetails.getUsername()));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/username")
@@ -58,8 +68,8 @@ public class UserController {
             if (userAnswer == null) return ResponseEntity.ok(List.of());
 
             return ResponseEntity.ok(userAnswer);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -71,42 +81,65 @@ public class UserController {
             if (userAnswer == null) return ResponseEntity.ok(List.of());
 
             return ResponseEntity.ok(userAnswer);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/byIds")
     public ResponseEntity<List<UserAnswer>> getUsersByIds(@RequestParam("ids") String ids) {
-        return ResponseEntity.ok(
-                Arrays.stream(ids.split(","))
-                        .map(id -> userService.getUserById(Integer.parseInt(id)))
-                        .filter(Objects::nonNull)
-                        .toList());
+        try {
+            return ResponseEntity.ok(
+                    Arrays.stream(ids.split(","))
+                            .map(id -> userService.getUserById(Integer.parseInt(id)))
+                            .filter(Objects::nonNull)
+                            .toList());
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/contacts")
     public ResponseEntity<List<ContactAnswer>> getContacts(@AuthenticationPrincipal UserDetails userDetails) {
 //        User user = userService.getUserAsUser();
-
-        return ResponseEntity.ok(contactService.getContactAndFriends(userDetails.getUsername()));
+        try {
+            return ResponseEntity.ok(contactService.getContactAndFriends(userDetails.getUsername()));
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/add_contact")
     public ResponseEntity<ContactAnswer> updateContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
-        int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
+        try {
+            int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
 
-        if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
+            if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
 
-        return ResponseEntity.ok(contactService.updateContact(request));
+            return ResponseEntity.ok(contactService.updateContact(request));
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/delete_contact")
     public ResponseEntity<Boolean> deleteContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
-        int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
+        try {
+            int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
 
-        if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
-        return ResponseEntity.ok(contactService.deleteContact(request));
+            if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok(contactService.deleteContact(request));
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
