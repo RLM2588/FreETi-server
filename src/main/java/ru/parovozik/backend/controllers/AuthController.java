@@ -51,7 +51,7 @@ public class AuthController {
             return ResponseEntity.ok(tokens);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 

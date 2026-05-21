@@ -95,32 +95,16 @@ public class GroupEventService {
         String ym = yearMonthEntry.substring(0, lastIndex);
         int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
 
-        LocalDateTime startOfMonth;
-        LocalDateTime endOfMonth;
-
         YearMonth yearMonth = YearMonth.parse(ym);
-        if (day == 1) {
-            endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
-            yearMonth.minusMonths(1);
-            startOfMonth = yearMonth.atEndOfMonth().atStartOfDay();
-        }
-        else if (!yearMonth.isValidDay(day + 1)) {
-            startOfMonth = yearMonth.atDay(day - 1).atStartOfDay();
-            yearMonth.plusMonths(1);
-            endOfMonth = yearMonth.atDay(1).atTime(LocalTime.MAX);
-        }
-        else {
-            startOfMonth = yearMonth.atDay(1).atStartOfDay();
-            endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
-        }
 
-        startOfMonth = yearMonth.atDay(day).atStartOfDay();
-        endOfMonth = yearMonth.atDay(day).atTime(LocalTime.MAX);
+        LocalDate targetDate = yearMonth.atDay(day);
 
-        List<GroupEvents> events = groupEventsRepository.findAllByGroupAndEndingBetween(group, startOfMonth, endOfMonth);
-        //events = groupEventsRepository.findAllByGroup(group);
+        LocalDateTime startDateTime = targetDate.minusDays(2).atStartOfDay();
+        LocalDateTime endDateTime = targetDate.plusDays(2).atTime(LocalTime.MAX);
 
-
+        List<GroupEvents> events = groupEventsRepository.findAllByGroupAndEndingBetween(
+                group, startDateTime, endDateTime
+        );
 
         return events.stream().map(GroupEvents::toGroupTaskAnswer).toList();
     }
@@ -233,44 +217,6 @@ public class GroupEventService {
         }
     }
 
-    /*
-    public List<GroupTaskAnswer> findEventPeriods(String groupId, int createdById, GroupEventRequest request) {
-        String[] ymd = request.day_start().split("-");
-        String[] st_ymd = request.day_start().split(":");
-        int t = Integer.parseInt(st_ymd[1]);
-        int startHalfHourCount = Integer.parseInt(st_ymd[0]) * 2 + (t / 30 + (t % 30 > 0 ? 1 : 0));
-        LocalDateTime startTime = LocalDateTime.of(Integer.parseInt(ymd[0]), Integer.parseInt(ymd[1]), Integer.parseInt(ymd[2]),
-                Integer.parseInt(st_ymd[0]), Integer.parseInt(st_ymd[1]));
-        ymd = request.day_end().split("-");
-        st_ymd = request.day_end().split(":");
-        t = Integer.parseInt(st_ymd[1]);
-        int endHalfHourCount = 48 - Integer.parseInt(st_ymd[0]) * 2 + (t / 30 + (t % 30 > 0 ? 1 : 0));
-
-
-        LocalDateTime endTime = LocalDateTime.of(Integer.parseInt(ymd[0]), Integer.parseInt(ymd[1]), Integer.parseInt(ymd[2]),
-                Integer.parseInt(st_ymd[0]), Integer.parseInt(st_ymd[1]));
-
-        LocalDateTime deltaDays = endTime.minusYears(startTime.getYear()).minusDays(startTime.getDayOfYear());
-        int countDaysDelta = deltaDays.getDayOfYear();
-        if (deltaDays.minusDays(countDaysDelta).getDayOfYear() > 10) throw new IllegalArgumentException("too long day period");
-
-
-        List<GroupsUsers> users = groupUsersRepository.findAllByGroup(groupsRepository.getById(UUID.fromString(groupId)));
-
-        long[] days = new long[countDaysDelta];
-        long mask = (long) ((2L << startHalfHourCount + 1) - 1) << (48 - startHalfHourCount);
-        mask = mask | (2L << endHalfHourCount);
-
-        Arrays.fill(days, mask);
-
-        for (GroupsUsers user : users)
-            taskService.returnTasksByMonth(user.getUser(), List.of(Privacy.FRIENDS, Privacy.PRIVATE, Privacy.PUBLIC), LocalDateTime start, LocalDateTime time_end);
-
-
-
-    }
-    */
-
 
     public List<TimeInterval> findEventPeriods(String groupId, int createdById, GroupEventRequest request) {
         // 1. Парсим рабочие часы внутри дня (ожидается формат "HH:mm", например "09:00")
@@ -299,13 +245,12 @@ public class GroupEventService {
             return Collections.emptyList();
         }
 
-        // ОПТИМИЗАЦИЯ: собираем ID всех пользователей, чтобы сделать ОДИН запрос к БД вместо цикла
+        // собираем ID всех пользователей, чтобы сделать ОДИН запрос к БД вместо цикла
         List<Integer> userIds = users.stream()
                 .map(u -> u.getUser().getUserId())
                 .collect(Collectors.toList());
 
         // Получаем ВСЕ задачи для ВСЕХ пользователей за этот период одним запросом
-        // (Рекомендуется добавить такой метод в taskService взамен returnTasksByMonth в цикле)
         List<TaskAnswer> allTasks = taskService.returnTasksForUsersInPeriod(
                 userIds,
                 List.of(Privacy.FRIENDS, Privacy.PRIVATE, Privacy.PUBLIC),
@@ -343,13 +288,13 @@ public class GroupEventService {
         // 4. Сортируем все занятые интервалы строго по времени начала
         busyIntervals.sort(Comparator.comparing(TimeInterval::start));
 
-        // 5. Линейный поиск свободных окон (Алгоритм с maxEnd)
+        // 5. Линейный поиск свободных окон
         List<TimeInterval> freeIntervals = new ArrayList<>();
         Instant maxEnd = globalStart; // Указатель текущего окончания занятого времени
 
         for (TimeInterval busy : busyIntervals) {
             // Если начало текущей задачи позже, чем наш максимальный конец предыдущих задач,
-            // значит, мы наткнулись на "дыру" (свободное время)
+            // значит, мы наткнулись на свободное время
             if (busy.start().isAfter(maxEnd)) {
                 long gap = busy.start().toEpochMilli() - maxEnd.toEpochMilli();
                 if (gap >= timePickMillis) {
@@ -376,8 +321,6 @@ public class GroupEventService {
             System.out.println(timeInterval.end);
         }
 
-        // 7. Маппинг и возврат результата
-        // Здесь вы можете превратить List<TimeInterval> в ваш List<GroupTaskAnswer>, если это необходимо
         return freeIntervals;
     }
 
@@ -408,16 +351,16 @@ public class GroupEventService {
                     ));
 
                     return new GroupTaskAnswer(
-                            uuid.toString(),                       // Генерация уникального ID для предложения
-                            request.title(),                       // Заголовок по умолчанию
-                            request.body(),                        // Описание по умолчанию
+                            uuid.toString(),
+                            request.title(),
+                            request.body(),
                             groupId,
-                            taskStart,                             // Задача начинается ровно в начале свободного окна
-                            taskEnd,                               // Длится ровно time_pick миллисекунд
-                            Status.ACTIVE,                         // Статус по умолчанию
-                            request.importance(),                  // Важность (importance)
-                            request.colour(),                      // Цвет карточки по умолчанию
-                            null,                                  // vote_id (заполняется при создании голосования)
+                            taskStart,
+                            taskEnd,
+                            Status.ACTIVE,
+                            request.importance(),
+                            request.colour(),
+                            null,
                             createdBy.getUserId()
                     );
                 })

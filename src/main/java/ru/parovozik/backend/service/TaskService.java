@@ -232,23 +232,14 @@ public class TaskService {
         String ym = yearMonthEntry.substring(0, lastIndex);
         int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
 
-        LocalDateTime startOfMonth;
-        LocalDateTime endOfMonth;
-//        System.out.println(yearMonthEntry + " " + ym + " " + String.valueOf(day));
         YearMonth yearMonth = YearMonth.parse(ym);
-        if (day == 1) {
-            endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
-            yearMonth.minusMonths(1);
-            startOfMonth = yearMonth.atEndOfMonth().atStartOfDay();
-        } else if (!yearMonth.isValidDay(day + 1)) {
-            startOfMonth = yearMonth.atDay(day - 1).atStartOfDay();
-            yearMonth.plusMonths(1);
-            endOfMonth = yearMonth.atDay(1).atTime(LocalTime.MAX);
-        } else {
-            startOfMonth = yearMonth.atDay(1).atStartOfDay();
-            endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
-        }
-        return returnOtherTasksByMonth(user, List.of(Privacy.FRIENDS, Privacy.PUBLIC), startOfMonth, endOfMonth);
+        LocalDate targetDate = yearMonth.atDay(day);
+
+        // Запас в 2 дня до и 2 дня после
+        LocalDateTime startDateTime = targetDate.minusDays(2).atStartOfDay();
+        LocalDateTime endDateTime = targetDate.plusDays(2).atTime(LocalTime.MAX);
+
+        return returnOtherTasksByMonth(user, List.of(Privacy.FRIENDS, Privacy.PUBLIC), startDateTime, endDateTime);
     }
 
     @Transactional
@@ -258,25 +249,14 @@ public class TaskService {
         String ym = yearMonthEntry.substring(0, lastIndex);
         int day = Integer.parseInt(yearMonthEntry.substring(lastIndex + 1));
 
-        System.out.println(yearMonthEntry + " " + ym + " " + String.valueOf(day));
-
-        LocalDateTime startOfMonth;
-        LocalDateTime endOfMonth;
-
         YearMonth yearMonth = YearMonth.parse(ym);
-        if (day == 1) {
-            endOfMonth = yearMonth.atDay(2).atTime(LocalTime.MAX);
-            yearMonth.minusMonths(1);
-            startOfMonth = yearMonth.atEndOfMonth().atStartOfDay();
-        } else if (!yearMonth.isValidDay(day + 1)) {
-            startOfMonth = yearMonth.atDay(day - 1).atStartOfDay();
-            yearMonth.plusMonths(1);
-            endOfMonth = yearMonth.atDay(1).atTime(LocalTime.MAX);
-        } else {
-            startOfMonth = yearMonth.atDay(1).atStartOfDay();
-            endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
-        }
-        return returnOtherTasksByMonth(user, List.of(Privacy.PUBLIC), startOfMonth, endOfMonth);
+        LocalDate targetDate = yearMonth.atDay(day);
+
+        // Запас в 2 дня до и 2 дня после
+        LocalDateTime startDateTime = targetDate.minusDays(2).atStartOfDay();
+        LocalDateTime endDateTime = targetDate.plusDays(2).atTime(LocalTime.MAX);
+
+        return returnOtherTasksByMonth(user, List.of(Privacy.PUBLIC), startDateTime, endDateTime);
     }
 
     private List<TaskAnswer> returnTasks(User user, List<Privacy> pr) {
