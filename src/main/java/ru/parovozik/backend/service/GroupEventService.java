@@ -310,7 +310,8 @@ public class GroupEventService {
                 userIds,
                 List.of(Privacy.FRIENDS, Privacy.PRIVATE, Privacy.PUBLIC),
                 globalStart,
-                globalEnd
+                globalEnd,
+                request.importance()
         );
 
         // 3. Формируем список всех "занятых" интервалов

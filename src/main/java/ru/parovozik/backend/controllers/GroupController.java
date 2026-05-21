@@ -199,7 +199,7 @@ public class GroupController {
         //if (role != null) return (ResponseEntity<List<GroupTaskAnswer>>) ResponseEntity.badRequest(null);
 
         List<GroupTaskAnswer> tasks = groupEventService.getTasksByStartAndEnd(uuid, yearMonthDay);
-        tasks = groupEventsRepository.findAllByGroup(groupService.getGroupInfo(uuid)).stream().map(GroupEvents::toGroupTaskAnswer).toList();
+        //tasks = groupEventsRepository.findAllByGroup(groupService.getGroupInfo(uuid)).stream().map(GroupEvents::toGroupTaskAnswer).toList();
         return ResponseEntity.ok(tasks);
     }
 }

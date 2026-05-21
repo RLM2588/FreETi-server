@@ -36,7 +36,7 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         authService.initiateRegistration(request);
         return ResponseEntity.ok("Verification code sent");
     }

@@ -35,11 +35,14 @@ public interface TaskRepository extends CrudRepository<Task, UUID> {
             "WHERE t.user.userId IN :userIds " +
             "AND t.privacy IN :privacies " +
             "AND t.start < :endPeriod " +
-            "AND t.ending > :startPeriod")
+            "AND t.ending > :startPeriod" +
+            "AND t.importance >= :importanceValue"
+    )
     List<Task> findTasksForUsersInPeriod(
             @Param("userIds") List<Integer> userIds,
             @Param("privacies") List<Privacy> privacies,
             @Param("startPeriod") LocalDateTime startPeriod,
-            @Param("endPeriod") LocalDateTime endPeriod
+            @Param("endPeriod") LocalDateTime endPeriod,
+            @Param("importanceValue") int importance
     );
 }

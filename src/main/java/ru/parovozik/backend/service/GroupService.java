@@ -85,6 +85,9 @@ public class GroupService {
         try {
             User user = userRepository.findUserByUsername(username);
             Groups group1 = groupsRepository.getById(group);
+            GroupsUsers gu = groupUsersRepository.findByUserAndGroup(user, group1);
+            if (gu != null) throw new Exception("This user already added in this group");
+
             GroupsUsers groupsUsers = new GroupsUsers();
             groupsUsers.setUser(user);
             groupsUsers.setGroup(group1);

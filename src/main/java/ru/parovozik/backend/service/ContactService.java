@@ -56,10 +56,8 @@ public class ContactService {
                     userRepository.findUserByUserId(request.user2())
             ) != null) {
                 contactRepository.updateIsFriend(userRepository.findUserByUserId(request.user1()),
-                        userRepository.findUserByUserId(request.user2()), !request.isFriend());
-                System.out.println(request.user1());
-                System.out.println(request.user2());
-                System.out.println(request.isFriend());
+                        userRepository.findUserByUserId(request.user2()), request.isFriend());
+                System.out.println("contact edited, u1: " + request.user1() + ", u2: " + request.user2() + ", isFriend: " + request.isFriend());
                 return request;
             }
             else {

@@ -38,8 +38,9 @@ public class TaskService {
     public List<TaskAnswer> returnTasksForUsersInPeriod(List<Integer> userIds,
                                                         List<Privacy> privacyList,
                                                         Instant globalStart,
-                                                        Instant globalEnd) {
-        return taskRepository.findTasksForUsersInPeriod(userIds, privacyList, toLocalDateTime(globalStart), toLocalDateTime(globalEnd)).stream().map(Task::toTaskAnswer).toList();
+                                                        Instant globalEnd,
+                                                        int importance) {
+        return taskRepository.findTasksForUsersInPeriod(userIds, privacyList, toLocalDateTime(globalStart), toLocalDateTime(globalEnd),importance).stream().map(Task::toTaskAnswer).toList();
     }
 
     public boolean createTask(TaskAnswer taskRequest, String username) {
