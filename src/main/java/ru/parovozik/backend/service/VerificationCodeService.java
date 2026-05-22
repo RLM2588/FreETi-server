@@ -44,6 +44,13 @@ public class VerificationCodeService {
         codes.remove(email);
     }
 
+    public boolean canSendNewCode(String email) {
+        VerificationCode storedCode = codes.get(email);
+        if (storedCode == null) return true;
+        Instant endTime = storedCode.expiresAt;
+        return Instant.now().isAfter(endTime.minusSeconds(expirationMinutes * 60L - 60L));
+    }
+
     private String generateRandomCode() {
         int min = (int) Math.pow(10, codeLength - 1);
         int max = (int) Math.pow(10, codeLength) - 1;

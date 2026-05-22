@@ -44,11 +44,17 @@ public class AuthService {
             throw new RuntimeException("Email already exists");
         }
 
+        if (!verificationCodeService.canSendNewCode(request.getEmail())) {
+            throw new RuntimeException("Wait 1 minute for sending new code");
+        }
+
         // Генерация кода
         String code = verificationCodeService.generateCode(request.getEmail());
+        System.out.println("code was generated");
 
         // Отправка кода на email
         emailService.sendVerificationCode(request.getEmail(), code, request.getUsername());
+        System.out.println("code was sent");
     }
 
     @Transactional

@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @GetMapping("/username")
-    public ResponseEntity<List<UserAnswer>> getUserByPartName(@RequestBody String username) {
+    public ResponseEntity<List<UserAnswer>> getUserByPartName(@RequestParam("username") String username) {
         try {
             List<UserAnswer> userAnswer = userService.getUsersByPartName(username);
             if (userAnswer == null) return ResponseEntity.ok(List.of());

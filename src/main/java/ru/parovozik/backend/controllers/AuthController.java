@@ -31,12 +31,25 @@ public class AuthController {
         }
     }
 
-
+    // TODO потом удалить когда в main будут переносить
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         try {
             authService.initiateRegistration(request);
+            System.out.println("verification code sent to " + request.getEmail());
             return ResponseEntity.ok("Verification code sent");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/register_resp")
+    public ResponseEntity<RegisterAnswerCode> registerResp(@RequestBody RegisterRequest request) {
+        try {
+            authService.initiateRegistration(request);
+            System.out.println("verification code sent to " + request.getEmail());
+            return ResponseEntity.ok(new RegisterAnswerCode("Verification code sent"));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return ResponseEntity.badRequest().build();
