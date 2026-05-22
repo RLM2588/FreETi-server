@@ -130,12 +130,12 @@ public class UserController {
     }
 
     @DeleteMapping("/delete_contact")
-    public ResponseEntity<Boolean> deleteContact(@RequestBody ContactAnswer request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<DeleteContactAnswer> deleteContact(@RequestParam("user1") int user1Id, @RequestParam("user2") int user2Id, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             int userId = userService.getUserAsUser(userDetails.getUsername()).getUserId();
 
-            if (request.user1() != userId || request.user2() == userId) return ResponseEntity.badRequest().build();
-            return ResponseEntity.ok(contactService.deleteContact(request));
+            if (user1Id != userId || user2Id == userId) return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok(new DeleteContactAnswer(contactService.deleteContact(user1Id, user2Id)));
         }
         catch (Exception ex) {
             System.out.println(ex.getMessage());

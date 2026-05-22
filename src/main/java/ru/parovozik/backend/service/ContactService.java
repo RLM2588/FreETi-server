@@ -36,10 +36,10 @@ public class ContactService {
 
 
     @Transactional
-    public boolean deleteContact(ContactAnswer request) {
+    public boolean deleteContact(int user1Id, int user2Id) {
         try{
-            Contact contact = contactRepository.findAllByFirstAndSecond(userRepository.findUserByUserId(request.user1()),
-                    userRepository.findUserByUserId(request.user2()));
+            Contact contact = contactRepository.findAllByFirstAndSecond(userRepository.findUserByUserId(user1Id),
+                    userRepository.findUserByUserId(user2Id));
             contactRepository.delete(contact);
             return true;
         }
