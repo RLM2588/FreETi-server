@@ -360,7 +360,7 @@ public class GroupEventService {
                             Status.ACTIVE,
                             request.importance(),
                             request.colour(),
-                            null,
+                            "",
                             createdBy.getUserId()
                     );
                 })
