@@ -157,6 +157,7 @@ public class AuthService {
 
     @Transactional
     public TokenResponse refresh(String refreshTokenValue) {
+        System.out.println("token to refresh: " + refreshTokenValue);
         RefreshToken storedToken = refreshTokenRepository.findByToken(refreshTokenValue)
                 .orElseThrow(() -> new RuntimeException("Refresh token not found"));
         if (storedToken.getExpiryDate().isBefore(Instant.now())) {

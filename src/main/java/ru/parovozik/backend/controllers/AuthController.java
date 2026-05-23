@@ -26,7 +26,7 @@ public class AuthController {
             TokenResponse tokens = authService.completeRegistration(request);
             return ResponseEntity.ok(tokens);
         } catch (Exception e) {
-            System.out.println("final register error");
+            System.out.println("final register error " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -73,6 +73,7 @@ public class AuthController {
     public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         try {
             TokenResponse tokens = authService.refresh(request.getRefreshToken());
+            System.out.println("refresh for token: " + request.getRefreshToken());
             return ResponseEntity.ok(tokens);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -83,7 +84,9 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
         try {
+            System.out.println("try to delete token: " + request.getRefreshToken());
             authService.logout(request.getRefreshToken());
+            System.out.println("success delete token: " + request.getRefreshToken());
             return ResponseEntity.ok("Logged out");
         }
         catch (Exception ex) {
