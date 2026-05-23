@@ -12,7 +12,8 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
+.env
+HELP.md
 ### IntelliJ IDEA ###
 .idea
 .idea/
@@ -32,3 +33,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### some properties and files for encryption ###
+**/application-local.properties
+**/keystore.p12
+**/*.p12
+**/server_certificate.crt
+
+.DS_Store/
+.DS_Store
+
+postgresql/
