@@ -109,9 +109,9 @@ public class TaskService {
         task.setImportance(incomingTask.importance());
         task.setColor(incomingTask.colour());
 
-        if (incomingTask.updated_at() != null) {
+        /*if (incomingTask.updated_at() != null) {
             task.setCreatedAt(toLocalDateTime(incomingTask.updated_at()));
-        }
+        }*/
 
         task.setEdited(true);
     }
@@ -301,10 +301,10 @@ public class TaskService {
 
         if (user != null) {
             List<Task> tasks = taskRepository.findByUserAndStartBetweenAndRepeatTaskIsNull(user, start, end);
+            System.out.println("get tasks request: " + tasks.size() + " tasks");
             for (Task task : tasks) {
                 if (pr.contains(task.getPrivacy())) {
                     ls.add(toTaskAnswer(task));
-                    System.out.println(task.getStart());
                 }
             }
             List<RepeatTask> repeatTasks = repeatTaskRepository.findRepeatTaskByUserAndGlobalEndAfter(user, start);
@@ -400,7 +400,6 @@ public class TaskService {
     public Task updateTask(TaskAnswer incomingTask, String username) {
         return taskRepository.findByClientUuidAndUser(incomingTask.id(), userRepository.findUserByUsername(username))
                 .map(existingTask -> {
-                    System.out.println("aaaaaaaaaaaaaaaaaaaa");
                     if (incomingTask.updated_at().isAfter(toInstant(existingTask.getCreatedAt()))) {
                         updateFields(existingTask, incomingTask);
                         return taskRepository.save(existingTask);

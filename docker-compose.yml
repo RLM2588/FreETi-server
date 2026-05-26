@@ -1,20 +1,17 @@
 services:
   postgresql:
     image: postgres:18-alpine
-    ports:
-      - "5434:5432"
     env_file:
       - ./.env
     volumes:
       - ./postgresql:/var/lib/postgresql
-
-  #main:
-    #build:
-      #context: .
-      #dockerfile: Dockerfile
-    #ports:
-     # - "8091:8091"
-   # env_file:
-  #    - ./.env
-  #  depends_on:
-  #    - postgresql
+  main:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+    env_file:
+      - ./.env
+    depends_on:
+      - postgresql
