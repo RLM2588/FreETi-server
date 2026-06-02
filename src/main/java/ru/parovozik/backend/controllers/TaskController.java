@@ -53,7 +53,7 @@ public class TaskController {
 
             User userReq = userService.getUserAsUser(userDetails.getUsername());
             User secondUser = userService.getUserAsUser(login);
-            Contact contact = contactRepository.findAllByFirstAndSecond(userReq, secondUser);
+            Contact contact = contactRepository.findAllByFirstAndSecond(secondUser, userReq);
             if (contact == null) return ResponseEntity.badRequest().build();
 
             if (contact.isFriend())
@@ -106,9 +106,10 @@ public class TaskController {
             LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
 
             LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+            LocalDateTime sinceRes = toLocalDateTime(Instant.ofEpochSecond(since));
 
             //return ResponseEntity.ok(taskService.returnAllTasks(userDetails.getUsername()));
-            return ResponseEntity.ok(taskService.returnTasksByMonth(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth));
+            return ResponseEntity.ok(taskService.returnTasksByMonthAndSince(user, List.of(Privacy.PRIVATE, Privacy.PUBLIC, Privacy.FRIENDS), startOfMonth, endOfMonth, sinceRes));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return ResponseEntity.badRequest().build();

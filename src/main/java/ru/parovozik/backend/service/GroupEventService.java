@@ -102,8 +102,8 @@ public class GroupEventService {
         LocalDateTime startDateTime = targetDate.minusDays(2).atStartOfDay();
         LocalDateTime endDateTime = targetDate.plusDays(2).atTime(LocalTime.MAX);
 
-        List<GroupEvents> events = groupEventsRepository.findAllByGroupAndEndingBetween(
-                group, startDateTime, endDateTime
+        List<GroupEvents> events = groupEventsRepository.findAllByGroupAndEndingBetweenWithStatus(
+                group, startDateTime, endDateTime, List.of(Status.ACTIVE, Status.CREATED)
         );
 
         return events.stream().map(GroupEvents::toGroupTaskAnswer).toList();
@@ -258,6 +258,8 @@ public class GroupEventService {
                 globalEnd,
                 request.importance()
         );
+
+        getGroupEvents(UUID.fromString(groupId));
 
         // 3. Формируем список всех "занятых" интервалов
         List<TimeInterval> busyIntervals = new ArrayList<>();

@@ -8,6 +8,7 @@ import ru.parovozik.backend.entity.RepeatTask;
 import ru.parovozik.backend.entity.Task;
 import ru.parovozik.backend.entity.User;
 import ru.parovozik.backend.model.Privacy;
+import ru.parovozik.backend.model.Status;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -24,6 +25,9 @@ public interface TaskRepository extends CrudRepository<Task, UUID> {
 
     // TODO нужно бы искать по тому, находится ли начало в данном промежутке
     List<Task> findByUserAndStartBetweenAndRepeatTaskIsNull(User user, LocalDateTime start, LocalDateTime end);
+
+    List<Task> findByUserAndStartBetweenAndRepeatTaskIsNullAndCreatedAtGreaterThanEqual(User user, LocalDateTime start, LocalDateTime end, LocalDateTime since);
+
     List<Task> findAllByUserAndRepeatTask(User user, RepeatTask repeatTask);
 
     List<Task> findByUserAndEndingBetweenAndRepeatTaskIn(User user, LocalDateTime endingAfter, LocalDateTime endingBefore, Collection<RepeatTask> repeatTasks);
@@ -35,14 +39,15 @@ public interface TaskRepository extends CrudRepository<Task, UUID> {
             "WHERE t.user.userId IN :userIds " +
             "AND t.privacy IN :privacies " +
             "AND t.start < :endPeriod " +
-            "AND t.ending > :startPeriod" +
-            "AND t.importance >= :importanceValue"
-    )
+            "AND t.ending > :startPeriod " +
+            "AND t.importance >= :importanceValue " +
+            "AND t.status IN :statuses")
     List<Task> findTasksForUsersInPeriod(
             @Param("userIds") List<Integer> userIds,
             @Param("privacies") List<Privacy> privacies,
             @Param("startPeriod") LocalDateTime startPeriod,
             @Param("endPeriod") LocalDateTime endPeriod,
-            @Param("importanceValue") int importance
+            @Param("importanceValue") int importance,
+            @Param("statuses") List<Status> statuses
     );
 }

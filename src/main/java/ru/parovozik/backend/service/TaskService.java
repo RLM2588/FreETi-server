@@ -40,7 +40,7 @@ public class TaskService {
                                                         Instant globalStart,
                                                         Instant globalEnd,
                                                         int importance) {
-        return taskRepository.findTasksForUsersInPeriod(userIds, privacyList, toLocalDateTime(globalStart), toLocalDateTime(globalEnd),importance).stream().map(Task::toTaskAnswer).toList();
+        return taskRepository.findTasksForUsersInPeriod(userIds, privacyList, toLocalDateTime(globalStart), toLocalDateTime(globalEnd), importance, List.of(Status.ACTIVE, Status.CREATED)).stream().map(Task::toTaskAnswer).toList();
     }
 
     public boolean createTask(TaskAnswer taskRequest, String username) {
@@ -295,6 +295,23 @@ public class TaskService {
         }
         return ls;
     }
+
+    public List<TaskAnswer> returnTasksByMonthAndSince(User user, List<Privacy> pr, LocalDateTime start, LocalDateTime end, LocalDateTime since) {
+        List<TaskAnswer> ls = new ArrayList<>();
+
+        if (user != null) {
+            List<Task> tasks = taskRepository.findByUserAndStartBetweenAndRepeatTaskIsNullAndCreatedAtGreaterThanEqual(user, start, end, since);
+            System.out.println("get tasks request (only updated tasks): " + tasks.size() + " tasks");
+            System.out.println("since = " + since.toString());
+            for (Task task : tasks) {
+                if (pr.contains(task.getPrivacy())) {
+                    ls.add(toTaskAnswer(task));
+                }
+            }
+        }
+        return ls;
+    }
+
 
     public List<TaskAnswer> returnTasksByMonth(User user, List<Privacy> pr, LocalDateTime start, LocalDateTime end) {
         List<TaskAnswer> ls = new ArrayList<>();

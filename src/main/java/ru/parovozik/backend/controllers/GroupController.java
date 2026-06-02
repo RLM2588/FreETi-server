@@ -39,6 +39,18 @@ public class GroupController {
         this.groupEventsRepository = groupEventsRepository;
     }
 
+    @GetMapping("/myrole")
+    public ResponseEntity<StringMessage> getMyRole(@RequestParam("group_id") String group_id, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Role role = groupService.getRole(userDetails.getUsername(), UUID.fromString(group_id));
+            System.out.println(role.toString());
+            return ResponseEntity.ok(new StringMessage(role.toString()));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/groups")
     public ResponseEntity<List<GroupAnswer>> getGroupsByLogin(@AuthenticationPrincipal UserDetails userDetails) {
         try {
