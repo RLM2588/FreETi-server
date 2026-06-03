@@ -134,6 +134,9 @@ public class TaskController {
     public ResponseEntity<TaskAnswer> updateTask(@RequestBody TaskAnswer incomingTask, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Task updatedTask;
+            if (incomingTask.title().length() > 70) {
+                throw new IllegalArgumentException("title length can't be longer than 70 symbols!");
+            }
             updatedTask = taskService.updateTask(incomingTask, userDetails.getUsername());
 
         /*if (taskRepository.findById(incomingTask.id()).isPresent()) {

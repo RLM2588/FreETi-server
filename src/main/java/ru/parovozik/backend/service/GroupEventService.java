@@ -62,7 +62,9 @@ public class GroupEventService {
 
     public boolean setUpGroupTask(UUID uuid, LocalDateTime start, LocalDateTime end) {
         try {
-            GroupEvents groupEvents = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) throw new Exception("this task is not exist");
+            GroupEvents groupEvents = res.get();
             groupEvents.setStart(start);
             groupEvents.setEnd(end);
             groupEventsRepository.save(groupEvents);
@@ -75,7 +77,10 @@ public class GroupEventService {
 
     public boolean deleteGroupTask(UUID uuid) {
         try {
-            GroupEvents groupEvents = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) throw new Exception("this task is already deleted");
+            GroupEvents groupEvents = res.get();
+
             groupEventsRepository.delete(groupEvents);
             return true;
         }
@@ -85,7 +90,8 @@ public class GroupEventService {
     }
 
     public GroupEvents getGroupEvents(UUID uuid) {
-        return groupEventsRepository.findById(uuid).get();
+        Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+        return res.orElse(null);
     }
 
     public List<GroupTaskAnswer> getTasksByStartAndEnd(UUID uuid, String yearMonthEntry) {
@@ -111,7 +117,9 @@ public class GroupEventService {
 
     public boolean updateTitle(UUID uuid, String newTitle) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setTitle(newTitle);
             groupEventsRepository.save(task);
             return true;
@@ -123,7 +131,9 @@ public class GroupEventService {
 
     public boolean updateBody(UUID uuid, String newBody) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setBody(newBody);
             groupEventsRepository.save(task);
             return true;
@@ -135,7 +145,9 @@ public class GroupEventService {
 
     public boolean updateStart(UUID uuid, LocalDateTime start) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setStart(start);
             groupEventsRepository.save(task);
             return true;
@@ -147,7 +159,9 @@ public class GroupEventService {
 
     public boolean updateEnd(UUID uuid, LocalDateTime end) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setEnd(end);
             groupEventsRepository.save(task);
             return true;
@@ -159,7 +173,9 @@ public class GroupEventService {
 
     public boolean updatePushTemplate(UUID uuid, PushTemplate pushTemplate) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setPushTemplate(pushTemplate);
             groupEventsRepository.save(task);
             return true;
@@ -171,7 +187,9 @@ public class GroupEventService {
 
     public boolean updateStatus(UUID uuid, Status status) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setStatus(status);
             groupEventsRepository.save(task);
             return true;
@@ -183,7 +201,9 @@ public class GroupEventService {
 
     public boolean updateColor(UUID uuid, String color) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setColor(color);
             groupEventsRepository.save(task);
             return true;
@@ -195,7 +215,9 @@ public class GroupEventService {
 
     public boolean updatePrivacy(UUID uuid, Privacy privacy) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setPrivacy(privacy);
             groupEventsRepository.save(task);
             return true;
@@ -207,7 +229,9 @@ public class GroupEventService {
 
     public boolean updateEdited(UUID uuid, boolean isEdited) {
         try {
-            GroupEvents task = groupEventsRepository.findById(uuid).get();
+            Optional<GroupEvents> res = groupEventsRepository.findById(uuid);
+            if (res.isEmpty()) return false;
+            GroupEvents task = res.get();
             task.setEdited(isEdited);
             groupEventsRepository.save(task);
             return true;
@@ -232,7 +256,6 @@ public class GroupEventService {
         // Глобальные рамки всего поиска
         Instant globalStart = startDate.atStartOfDay(zone).toInstant();
         Instant globalEnd = endDate.atTime(LocalTime.MAX).atZone(zone).toInstant();
-
 
         // Защита от слишком большого диапазона дат (аналог вашей проверки)
         if (Period.between(startDate, endDate).getDays() > 100) {
@@ -259,7 +282,7 @@ public class GroupEventService {
                 request.importance()
         );
 
-        getGroupEvents(UUID.fromString(groupId));
+        //getGroupEvents(UUID.fromString(groupId));
 
         // 3. Формируем список всех "занятых" интервалов
         List<TimeInterval> busyIntervals = new ArrayList<>();
@@ -286,6 +309,7 @@ public class GroupEventService {
                 busyIntervals.add(new TimeInterval(workingHoursEnd, endOfToday));
             }
         }
+
 
         // 4. Сортируем все занятые интервалы строго по времени начала
         busyIntervals.sort(Comparator.comparing(TimeInterval::start));
