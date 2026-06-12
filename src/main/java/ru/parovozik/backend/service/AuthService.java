@@ -35,7 +35,6 @@ public class AuthService {
 
     @Transactional
     public void initiateRegistration(RegisterRequest request) {
-        // Проверка существования пользователя
         if (userRepository.findUserByUsername(request.getUsername()) != null) {
             throw new RuntimeException("Username already exists");
         }
@@ -48,11 +47,9 @@ public class AuthService {
             throw new RuntimeException("Wait 1 minute for sending new code");
         }
 
-        // Генерация кода
         String code = verificationCodeService.generateCode(request.getEmail());
         System.out.println("code was generated");
 
-        // Отправка кода на email
         emailService.sendVerificationCode(request.getEmail(), code, request.getUsername());
         System.out.println("code was sent");
     }
@@ -69,19 +66,16 @@ public class AuthService {
 
     @Transactional
     public TokenResponse completeRegistration(FinalRegisterRequest request) {
-        // Проверка кода
         if (!verificationCodeService.validateCode(request.getEmail(), request.getCode())) {
             throw new RuntimeException("Invalid or expired verification code");
         }
 
-        // Создание пользователя
         User user = new User();
         user.setUsername(request.getLogin());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
-        // Удаление использованного кода
         verificationCodeService.removeCode(request.getEmail());
 
         return generateTokens(user);
@@ -92,7 +86,6 @@ public class AuthService {
         if (userRepository.findUserByUsername(request.getUsername()) != null) {
             throw new RuntimeException("Username already exists");
         }
-        // проверка email, если нужно:
         // if (userRepository.findByEmail(request.getEmail()) != null) { ... }
 
         User user = new User();
@@ -103,53 +96,11 @@ public class AuthService {
     }
 
 
-    /*@Transactional
-    public void initiateRegistration(RegisterRequest request) {
-        if (userRepository.findUserByUsername(request.getUsername()) != null) {
-            throw new RuntimeException("Username already exists");
-        }
-
-        // Генерация кода (например, 6 цифр)
-        String code = String.valueOf(new Random().nextInt(899999) + 100000);
-        verificationCodes.put(request.getEmail(), code);
-
-        // Тут должна быть отправка письма. Пока выводим в консоль:
-        System.out.println("Код подтверждения для " + request.getEmail() + ": " + code);
-    }
-
-    @Transactional
-    public void sendVerificationCode(String username, String email) {
-        if (userRepository.findUserByUsername(username) != null) {
-            throw new RuntimeException("Username already exists");
-        }
-
-        String code = String.valueOf(new Random().nextInt(899999) + 100000);
-        verificationCodes.put(email, code);
-
-        System.out.println("Код для " + email + ": " + code);
-    }
-
-    @Transactional
-    public TokenResponse completeRegistration(FinalRegisterRequest request) {
-        String validCode = verificationCodes.get(request.getEmail());
-        if (validCode == null || !validCode.equals(request.getCode())) {
-            throw new RuntimeException("Invalid or expired verification code");
-        }
-
-        User user = new User();
-        user.setUsername(request.getLogin());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepository.save(user);
-
-        verificationCodes.remove(request.getEmail());
-        return generateTokens(user);
-    }*/
-
     @Transactional
     public TokenResponse login(LoginRequest request) {
         User user = userRepository.findUserByUsername(request.getUsername());
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            System.out.println(passwordEncoder.encode(request.getPassword()));
             throw new RuntimeException("Invalid credentials");
         }
         return generateTokens(user);

@@ -54,9 +54,9 @@ public class TaskController {
             User userReq = userService.getUserAsUser(userDetails.getUsername());
             User secondUser = userService.getUserAsUser(login);
             Contact contact = contactRepository.findAllByFirstAndSecond(secondUser, userReq);
-            if (contact == null) return ResponseEntity.badRequest().build();
+            //if (contact == null) return ResponseEntity.badRequest().build();
 
-            if (contact.isFriend())
+            if (contact != null && contact.isFriend())
                 return ResponseEntity.ok(taskService.returnFriendTasks(login, yearMonth));
 
             return ResponseEntity.ok(taskService.returnOrdinalTasks(login, yearMonth));
@@ -137,10 +137,6 @@ public class TaskController {
             if (incomingTask.title().length() > 70) {
                 throw new IllegalArgumentException("title length can't be longer than 70 symbols!");
             }
-//            System.out.println(incomingTask.start().toEpochMilli());
-//            System.out.println(incomingTask.time_end().toEpochMilli());
-//            System.out.println(incomingTask.start().getEpochSecond());
-//            System.out.println(incomingTask.time_end().getEpochSecond());
 
             if (Math.abs(incomingTask.time_end().getEpochSecond() - incomingTask.start().getEpochSecond()) > 1000 * 60 * 60 * 24 * 7) {
                 throw new IllegalArgumentException("task can't be longer than one week!");
