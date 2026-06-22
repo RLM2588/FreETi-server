@@ -138,7 +138,8 @@ public class TaskController {
                 throw new IllegalArgumentException("title length can't be longer than 70 symbols!");
             }
 
-            if (Math.abs(incomingTask.time_end().getEpochSecond() - incomingTask.start().getEpochSecond()) > 1000 * 60 * 60 * 24 * 7) {
+            if (incomingTask.time_end().getEpochSecond() > 1000000 && incomingTask.start().getEpochSecond() > 1000000 && Math.abs(incomingTask.time_end().getEpochSecond() - incomingTask.start().getEpochSecond()) > 1000 * 60 * 60 * 24 * 7) {
+                System.out.println(incomingTask.time_end().getEpochSecond());
                 throw new IllegalArgumentException("task can't be longer than one week!");
             }
             updatedTask = taskService.updateTask(incomingTask, userDetails.getUsername());
